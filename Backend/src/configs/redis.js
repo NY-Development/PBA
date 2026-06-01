@@ -1,9 +1,9 @@
 import { createClient } from 'redis';
-import { REDIS_URL } from './env';
-import logger from '../utils/logger';
+import { Env } from './env';
+import logger from '../utils/logger.js';
 
 export const redisClient = createClient({
-  url: REDIS_URL,
+  url: Env.REDIS_URL,
 });
 
 redisClient.on('error', (err) => logger.error('Redis Client Error', err));
