@@ -1,0 +1,11 @@
+[16:07:02.925] [INFO] [36mInitializing Storybook[39m
+[16:07:03.019] [DEBUG] Getting package.json info for /media/yamlak/OS1/Users/yamla/Desktop/NYDev/nyProjects/peanut-butter-app/package.json...
+[16:07:03.019] [INFO] Package manager: npm
+[16:07:03.022] [ERROR] [38;2;241;97;97mError: ENOENT: no such file or directory, open './package.json'[39m
+    at readFileSync (node:fs:440:20)
+    at _JsPackageManager.getPackageJson (file:///home/yamlak/.npm/_npx/05823ecb1a3a987d/node_modules/storybook/dist/_node-chunks/chunk-PNYLLFX3.js:9724:23)
+    at get packageJson (file:///home/yamlak/.npm/_npx/05823ecb1a3a987d/node_modules/storybook/dist/_node-chunks/chunk-PNYLLFX3.js:10075:34)
+    at PreflightCheckCommand.checkPackageNameConflict (file:///home/yamlak/.npm/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/chunk-UR7I3RA2.js:666:39)
+    at PreflightCheckCommand.execute (file:///home/yamlak/.npm/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/chunk-UR7I3RA2.js:645:14)
+[16:07:29.916] [PROMPT] Would you like to send anonymous crash reports to improve Storybook and fix bugs faster? {"choice":true}
+[16:07:29.920] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
