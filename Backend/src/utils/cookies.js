@@ -1,4 +1,4 @@
-import { Env } from "../config/env";
+import { Env } from "../configs/env.js";
 
 const accessCookieOptions = {
     httpOnly: true,
