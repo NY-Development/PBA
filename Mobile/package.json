@@ -1,15 +1,14 @@
 {
   "name": "Mobile",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "1.0.0",
   "scripts": {
     "dev": "expo start -c",
+    "storybook:native": "expo start -c",
     "android": "expo start -c --android",
     "ios": "expo start -c --ios",
     "web": "expo start -c --web",
     "clean": "rm -rf .expo node_modules",
-    "storybook:ios": "cross-env STORYBOOK_ENABLED=true expo start -c --ios",
-    "storybook:android": "cross-env STORYBOOK_ENABLED=true expo start -c --android",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "doctor": "npx expo-doctor && npx expo install --check",

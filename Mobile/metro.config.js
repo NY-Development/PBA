@@ -10,5 +10,9 @@ config = withNativeWind(config, { input: './global.css' });
 
 // 3. Chain it with the Storybook v10 configuration wrapper
 module.exports = withStorybook(config, {
-  enabled: process.env.STORYBOOK_ENABLED === 'true',
+  // Update this line to look at the correct EXPO_PUBLIC environment key
+  enabled: process.env.EXPO_PUBLIC_STORYBOOK === 'true',
+  
+  // Explicitly tell Storybook to use your .rnstorybook folder configuration
+  configPath: './.rnstorybook', 
 });
