@@ -66,6 +66,7 @@
     "@types/react": "~19.2.10",
     "@vitest/browser-playwright": "^4.1.8",
     "@vitest/coverage-v8": "^4.1.8",
+    "babel-preset-expo": "~55.0.0",
     "playwright": "^1.60.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",

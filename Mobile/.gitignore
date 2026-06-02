@@ -43,3 +43,9 @@ expo-env.d.ts
 storybook-static
 
 debug-storybook.log
+
+# Environment Variables
+.env
+
+# Designs
+Design/

@@ -1,10 +1,14 @@
-const {
-  withStorybook,
-} = require('@storybook/react-native/withStorybook');
-
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
+const { withStorybook } = require('@storybook/react-native/withStorybook');
 
-const config = getDefaultConfig(__dirname);
+// 1. Get the baseline Expo configuration
+let config = getDefaultConfig(__dirname);
 
-module.exports = withStorybook(withNativeWind(config, { input: './global.css', inlineRem: 16 }));
+// 2. Wrap it with NativeWind v4 (points to your global CSS input)
+config = withNativeWind(config, { input: './global.css' });
+
+// 3. Chain it with the Storybook v10 configuration wrapper
+module.exports = withStorybook(config, {
+  enabled: process.env.STORYBOOK_ENABLED === 'true',
+});
