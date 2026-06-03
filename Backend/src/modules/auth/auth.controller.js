@@ -64,7 +64,7 @@ const logout = async(req, res) => {
     await Cookie.clearRefreshToken(res)
   
     return res.status(200).json({
-      message: "Logged out successfully, session and token deleted"
+      message: "Logged out successfully"
     });
   }catch(err){
     logger.error("Logout error:", err.message);
@@ -78,8 +78,9 @@ const logout = async(req, res) => {
 // GET ME / CURRENT USER
 const getMe = async (req, res) => {
   try {
+    console.log(req.user)
     const user = await AuthService.getMe(req.user.userId);
-  
+    
     return res.status(200).json({
       authenticated: true,
       user

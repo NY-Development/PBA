@@ -6,8 +6,6 @@ if(!Env.ACCESS_TOKEN_SECRET || !Env.ACCESS_TOKEN_EXPIRY || !Env.REFRESH_TOKEN_EX
   throw new Error("Missing JWT env variables");
 }
 
-
-
 const generateAccessToken = (payload) => {
   return jwt.sign(payload, Env.ACCESS_TOKEN_SECRET, { expiresIn: Env.ACCESS_TOKEN_EXPIRY });
 };
@@ -16,7 +14,8 @@ const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, Env.ACCESS_TOKEN_SECRET);
   } catch (error) {
-    throw new Error("Invalid access token");
+    console.log("Invalid access token:", error.message);
+    throw new Error("Invalid access token:", error.message);
   }
 };
 

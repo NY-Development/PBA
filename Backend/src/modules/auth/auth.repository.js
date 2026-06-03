@@ -53,8 +53,8 @@ const findTokenBySession = async ({token_id}) => {
 const revokeToken = async ({ session_id, user_id }) => {
   const result = await sql`
     UPDATE refresh_tokens
-    SET revoked = true
-    WHERE id = ${session_id} AND user_id = ${user_id};
+    SET is_revoked = true
+    WHERE id = ${session_id} AND user_id = ${user_id}
     RETURNING *
   `;
 
