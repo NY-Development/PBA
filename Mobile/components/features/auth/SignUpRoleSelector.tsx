@@ -5,24 +5,69 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, Languages, User, Phone, Mail, Lock, Eye, EyeOff, ShoppingBag, Store, CheckCircle2, ArrowRight } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { z } from 'zod';
 
-// 🌟 Enforcing your reusable atomic components
+// Atomic UI components
 import { CustomInput } from '@/components/common/CustomInput';
 import { CustomButton } from '@/components/common/CustomButton';
+
+// Auth Integrations
+import { useSignUpMutation } from '@/src/hooks/auth/useAuthMutation';
+import { signUpSchema } from '@/src/types/validation/auth.schema';
 
 export function SignUpRoleSelector() {
   const router = useRouter();
   const [role, setRole] = useState<'buyer' | 'maker'>('buyer');
-  const [fullName, setFullName] = useState('');
+  const [first_name, setFirstName] = useState('');
+  const [last_name, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureText, setSecureText] = useState(true);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { mutate: signUp, isPending } = useSignUpMutation({
+    onSuccess: () => {
+      // Safely fires after useAuthStore updates tokens globally
+      router.push({
+        pathname: '/(auth)/otp-verify',
+        params: { identity: `+251${phone}` }
+      });
+    },
+    onError: (error) => {
+      // Type-safe extraction thanks to ApiError handling in hook definition
+      setErrors({ form: error.response?.data?.message || 'Registration failed. Please try again.' });
+    }
+  });
+
+  const handleSignUp = () => {
+    try {
+      const validData = signUpSchema.parse({
+        role,
+        first_name,
+        last_name,
+        phone: `+251${phone}`, // Structural structural match for Ethiopian phone criteria
+        email,
+        password,
+        agreeTerms,
+      });
+      setErrors({});
+      signUp(validData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: Record<string, string> = {};
+        error.issues.forEach((err) => {
+          if (err.path[0]) formattedErrors[err.path[0].toString()] = err.message;
+        });
+        setErrors(formattedErrors);
+      }
+    }
+  };
 
   return (
     <SafeAreaView edges={['top', 'bottom', 'left', 'right']} className="flex-1 bg-background">
-      {/* Sticky Structural Header Module */}
+      {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-border bg-background">
         <Pressable 
           onPress={() => router.back()}
@@ -47,8 +92,6 @@ export function SignUpRoleSelector() {
         contentContainerStyle={{ paddingBottom: 140 }}
       >
         <View className="px-6 pt-4">
-          
-          {/* Main Headline Title */}
           <View className="mb-6">
             <Text className="text-foreground tracking-tight text-2xl font-extrabold mb-1">
               Welcome to the Hub
@@ -58,14 +101,18 @@ export function SignUpRoleSelector() {
             </Text>
           </View>
 
-          {/* Dual Interactive Role Visual Board */}
+          {errors.form && (
+            <Text className="text-destructive text-sm font-medium text-center bg-destructive/10 p-2 rounded-md mb-4">
+              {errors.form}
+            </Text>
+          )}
+
+          {/* Role Choice Engine */}
           <View className="mb-6">
             <Text className="text-foreground text-xs font-bold uppercase tracking-wider mb-3">
               I am a...
             </Text>
             <View className="flex-row gap-4">
-              
-              {/* Buyer Selector Element */}
               <Pressable 
                 onPress={() => setRole('buyer')}
                 className={`flex-1 flex-col items-center justify-center p-4 rounded-xl border-2 bg-card relative ${
@@ -84,7 +131,6 @@ export function SignUpRoleSelector() {
                 )}
               </Pressable>
 
-              {/* Maker Selector Element */}
               <Pressable 
                 onPress={() => setRole('maker')}
                 className={`flex-1 flex-col items-center justify-center p-4 rounded-xl border-2 bg-card relative ${
@@ -102,32 +148,53 @@ export function SignUpRoleSelector() {
                   </View>
                 )}
               </Pressable>
-
             </View>
           </View>
 
-          {/* Primary Form Fields Block */}
+          {/* Input Fields Container */}
           <View className="gap-5">
-            
-            {/* Full Name field */}
-            <View className="gap-1.5">
-              <Text className="text-foreground text-sm font-semibold">Full Name</Text>
-              <CustomInput
-                value={fullName}
-                onChangeText={setFullName}
-                placeholder="Abebe Bikila"
-                leftIcon={<User size={18} className="text-muted-foreground" />}
-              />
+            <View className="flex-row gap-4">
+              <View className="flex-1 gap-1.5">
+                <Text className="text-foreground text-sm font-semibold">First Name</Text>
+                <CustomInput
+                  value={first_name}
+                  onChangeText={(text) => {
+                    setFirstName(text);
+                    if (errors.first_name) setErrors({ ...errors, first_name: '' });
+                  }}
+                  placeholder="Abebe"
+                  containerClassName={errors.first_name ? 'border-destructive' : ''}
+                  leftIcon={<User size={18} className="text-muted-foreground" />}
+                />
+                {errors.first_name && <Text className="text-destructive text-xs ml-1">{errors.first_name}</Text>}
+              </View>
+
+              <View className="flex-1 gap-1.5">
+                <Text className="text-foreground text-sm font-semibold">Last Name</Text>
+                <CustomInput
+                  value={last_name}
+                  onChangeText={(text) => {
+                    setLastName(text);
+                    if (errors.last_name) setErrors({ ...errors, last_name: '' });
+                  }}
+                  placeholder="Bikila"
+                  containerClassName={errors.last_name ? 'border-destructive' : ''}
+                />
+                {errors.last_name && <Text className="text-destructive text-xs ml-1">{errors.last_name}</Text>}
+              </View>
             </View>
 
-            {/* Phone Number Field */}
             <View className="gap-1.5">
               <Text className="text-foreground text-sm font-semibold">Phone Number</Text>
               <CustomInput
                 value={phone}
-                onChangeText={setPhone}
+                onChangeText={(text) => {
+                  setPhone(text);
+                  if (errors.phone) setErrors({ ...errors, phone: '' });
+                }}
                 placeholder="911 234 567"
                 keyboardType="phone-pad"
+                containerClassName={errors.phone ? 'border-destructive' : ''}
                 leftIcon={
                   <View className="flex-row items-center gap-1 border-r border-border pr-2">
                     <Phone size={18} className="text-muted-foreground" />
@@ -135,30 +202,38 @@ export function SignUpRoleSelector() {
                   </View>
                 }
               />
+              {errors.phone && <Text className="text-destructive text-xs ml-1">{errors.phone}</Text>}
             </View>
 
-            {/* Email Address Field */}
             <View className="gap-1.5">
               <Text className="text-foreground text-sm font-semibold">Email Address</Text>
               <CustomInput
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errors.email) setErrors({ ...errors, email: '' });
+                }}
                 placeholder="abebe@example.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                containerClassName={errors.email ? 'border-destructive' : ''}
                 leftIcon={<Mail size={18} className="text-muted-foreground" />}
               />
+              {errors.email && <Text className="text-destructive text-xs ml-1">{errors.email}</Text>}
             </View>
 
-            {/* Password input block */}
             <View className="gap-1.5">
               <Text className="text-foreground text-sm font-semibold">Password</Text>
               <CustomInput
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errors.password) setErrors({ ...errors, password: '' });
+                }}
                 placeholder="••••••••"
                 secureTextEntry={secureText}
                 autoCapitalize="none"
+                containerClassName={errors.password ? 'border-destructive' : ''}
                 leftIcon={<Lock size={18} className="text-muted-foreground" />}
                 rightIcon={
                   <Pressable onPress={() => setSecureText(!secureText)} className="p-1">
@@ -170,33 +245,39 @@ export function SignUpRoleSelector() {
                   </Pressable>
                 }
               />
+              {errors.password && <Text className="text-destructive text-xs ml-1">{errors.password}</Text>}
             </View>
 
-            {/* Terms Layout Toggle */}
-            <Pressable 
-              onPress={() => setAgreeTerms(!agreeTerms)}
-              className="flex-row items-start gap-3 my-2 active:opacity-80"
-            >
-              <View className={`w-5 h-5 rounded border items-center justify-center mt-0.5 ${
-                agreeTerms ? 'bg-primary border-primary' : 'border-input bg-card'
-              }`}>
-                {agreeTerms && <Text className="text-white text-xs font-bold">✓</Text>}
-              </View>
-              <Text className="text-sm text-muted-foreground font-medium leading-tight flex-1">
-                I agree to the <Text className="text-primary underline">Terms & Conditions</Text> and{' '}
-                <Text className="text-primary underline">Privacy Policy</Text>.
-              </Text>
-            </Pressable>
-
+            <View>
+              <Pressable 
+                onPress={() => {
+                  setAgreeTerms(!agreeTerms);
+                  if (errors.agreeTerms) setErrors({ ...errors, agreeTerms: '' });
+                }}
+                className="flex-row items-start gap-3 my-2 active:opacity-80"
+              >
+                <View className={`w-5 h-5 rounded border items-center justify-center mt-0.5 ${
+                  agreeTerms ? 'bg-primary border-primary' : (errors.agreeTerms ? 'border-destructive bg-destructive/10' : 'border-input bg-card')
+                }`}>
+                  {agreeTerms && <Text className="text-white text-xs font-bold">✓</Text>}
+                </View>
+                <Text className="text-sm text-muted-foreground font-medium leading-tight flex-1">
+                  I agree to the <Text className="text-primary underline">Terms & Conditions</Text> and{' '}
+                  <Text className="text-primary underline">Privacy Policy</Text>.
+                </Text>
+              </Pressable>
+              {errors.agreeTerms && <Text className="text-destructive text-xs ml-8">{errors.agreeTerms}</Text>}
+            </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* Persistent Base Action Sheet Layout */}
+      {/* Floating Bottom Button Dock */}
       <View className="absolute bottom-8 left-0 right-0 bg-background/95 border-t border-border p-6 pb-8">
         <CustomButton
           label="Create Account"
-          onPress={() => router.push('/(auth)/otp-verify')}
+          onPress={handleSignUp}
+          isLoading={isPending}
           rightIcon={<ArrowRight size={18} color="#ffffff" strokeWidth={2.5} />}
         />
         

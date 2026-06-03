@@ -5,25 +5,50 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, KeyRound, Mail, ArrowRight } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { z } from 'zod';
 
 // 🌟 Enforcing your exact reusable atomic components
 import { CustomInput } from '@/components/common/CustomInput';
 import { CustomButton } from '@/components/common/CustomButton';
 
+// 🌟 Auth Integrations
+import { useRecoveryMutation } from '@/src/hooks/auth/useAuthMutation';
+import { recoverySchema } from '@/src/types/validation/auth.schema';
+
 export default function AccountRecoveryScreen() {
   const router = useRouter();
   const [contact, setContact] = useState('');
-  const [isSending, setIsSending] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { mutate: sendRecoveryCode, isPending } = useRecoveryMutation({
+    onSuccess: () => {
+      // Smooth transition sequence into verification layout route
+      router.push({
+        pathname: '/(auth)/otp-verify',
+        params: { identity: contact }
+      });
+    },
+    onError: (error) => {
+      setErrors({ form: error.response?.data?.message || 'Failed to send recovery code. Please try again.' });
+    }
+  });
 
   const handleSendCode = () => {
     if (!contact.trim()) return;
-    setIsSending(true);
-    
-    // Smooth transition sequence into verification layout route
-    setTimeout(() => {
-      setIsSending(false);
-      router.push('/(auth)/otp-verify');
-    }, 800);
+
+    try {
+      const validData = recoverySchema.parse({ identity: contact });
+      setErrors({});
+      sendRecoveryCode(validData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: Record<string, string> = {};
+        error.issues.forEach((err) => {
+          if (err.path[0]) formattedErrors[err.path[0].toString()] = err.message;
+        });
+        setErrors(formattedErrors);
+      }
+    }
   };
 
   return (
@@ -56,6 +81,12 @@ export default function AccountRecoveryScreen() {
             </Text>
           </View>
 
+          {errors.form && (
+            <Text className="text-destructive text-sm font-medium text-center bg-destructive/10 p-2 rounded-md mb-4">
+              {errors.form}
+            </Text>
+          )}
+
           {/* Form Interactive Core using your strict CustomInput design pattern */}
           <View className="gap-1.5 w-full">
             <Text className="text-foreground text-sm font-semibold ml-1 mb-1">
@@ -63,12 +94,17 @@ export default function AccountRecoveryScreen() {
             </Text>
             <CustomInput
               value={contact}
-              onChangeText={setContact}
+              onChangeText={(text) => {
+                setContact(text);
+                if (errors.identity) setErrors({ ...errors, identity: '' });
+              }}
               placeholder="Enter your email or phone"
               autoCapitalize="none"
               keyboardType="email-address"
               leftIcon={<Mail size={18} className="text-muted-foreground" />}
+              containerClassName={errors.identity ? 'border-destructive' : ''}
             />
+            {errors.identity && <Text className="text-destructive text-xs ml-1">{errors.identity}</Text>}
           </View>
         </View>
 
@@ -77,7 +113,7 @@ export default function AccountRecoveryScreen() {
           <CustomButton
             label="Send Recovery Code"
             onPress={handleSendCode}
-            isLoading={isSending}
+            isLoading={isPending}
             variant="primary"
             rightIcon={<ArrowRight size={18} color="#ffffff" strokeWidth={2.5} />}
             className={!contact.trim() ? 'opacity-60' : ''}

@@ -5,17 +5,48 @@ import { useRouter } from 'expo-router';
 import { Languages, Mail, Eye, EyeOff } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { z } from 'zod';
 
 // 🌟 Enforcing your reusable atomic components
 import { CustomInput } from '@/components/common/CustomInput';
 import { CustomButton } from '@/components/common/CustomButton';
+
+// 🌟 Auth Integrations
+import { useLoginMutation } from '@/src/hooks/auth/useAuthMutation';
+import { signInSchema } from '@/src/types/validation/auth.schema';
 
 export function SignInForm() {
   const router = useRouter();
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   const [secureText, setSecureText] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { mutate: login, isPending } = useLoginMutation({
+    onSuccess: () => {
+      // Assuming /(auth)/home is the post-login destination in this file
+      router.replace('/(auth)/home');
+    },
+    onError: (error) => {
+      setErrors({ form: error.response?.data?.message || 'Login failed. Please try again.' });
+    }
+  });
+
+  const handleLogin = () => {
+    try {
+      const validData = signInSchema.parse({ identity, password });
+      setErrors({});
+      login(validData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: Record<string, string> = {};
+        error.issues.forEach((err) => {
+          if (err.path[0]) formattedErrors[err.path[0].toString()] = err.message;
+        });
+        setErrors(formattedErrors);
+      }
+    }
+  };
 
   return (
     <SafeAreaView edges={['top', 'bottom', 'left', 'right']} className="flex-1 bg-background">
@@ -48,6 +79,12 @@ export function SignInForm() {
         {/* Form Interactive Context Tree */}
         <View className="gap-5 w-full">
           
+          {errors.form && (
+            <Text className="text-destructive text-sm font-medium text-center bg-destructive/10 p-2 rounded-md">
+              {errors.form}
+            </Text>
+          )}
+
           {/* Identity Field Input */}
           <View className="gap-1.5">
             <Text className="text-foreground text-sm font-semibold ml-1">
@@ -55,12 +92,17 @@ export function SignInForm() {
             </Text>
             <CustomInput
               value={identity}
-              onChangeText={setIdentity}
+              onChangeText={(text) => {
+                setIdentity(text);
+                if (errors.identity) setErrors({ ...errors, identity: '' });
+              }}
               placeholder="Enter your email or phone"
               autoCapitalize="none"
               keyboardType="email-address"
               rightIcon={<Mail size={18} className="text-muted-foreground opacity-60" />}
+              containerClassName={errors.identity ? 'border-destructive' : ''}
             />
+            {errors.identity && <Text className="text-destructive text-xs ml-1">{errors.identity}</Text>}
           </View>
 
           {/* Password Input Block */}
@@ -70,10 +112,14 @@ export function SignInForm() {
             </Text>
             <CustomInput
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.password) setErrors({ ...errors, password: '' });
+              }}
               placeholder="Enter your password"
               secureTextEntry={secureText}
               autoCapitalize="none"
+              containerClassName={errors.password ? 'border-destructive' : ''}
               rightIcon={
                 <Pressable onPress={() => setSecureText(!secureText)} className="p-1">
                   {secureText ? (
@@ -84,6 +130,7 @@ export function SignInForm() {
                 </Pressable>
               }
             />
+            {errors.password && <Text className="text-destructive text-xs ml-1">{errors.password}</Text>}
 
             {/* Forgot Password Safe Trigger */}
             <View className="flex-row justify-end mt-1">
@@ -98,16 +145,10 @@ export function SignInForm() {
           {/* Core Login CTA Entry */}
           <CustomButton
             label="Login"
-            isLoading={isLoading}
+            isLoading={isPending}
             variant="primary"
             className="mt-2"
-            onPress={() => {
-              setIsLoading(true);
-              setTimeout(() => {
-                setIsLoading(false);
-                router.replace('/(auth)/home');
-              }, 800);
-            }}
+            onPress={handleLogin}
           />
         </View>
 
