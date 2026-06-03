@@ -1,5 +1,5 @@
 import { AuthService } from "./auth.service.js";
-import { Env } from "../../config/env.js"
+import { Env } from "../../configs/env.js"
 import { Cookie } from "../../utils/cookies.js"
 import logger from "../../utils/logger.js"
 
@@ -43,8 +43,8 @@ const login = async (req, res) => {
     
     return res.status(200).json({
       message: "Login successful",
+      accessToken,
       user,
-      accessToken
     });
 
   } catch (error) {

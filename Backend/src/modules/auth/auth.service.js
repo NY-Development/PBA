@@ -31,10 +31,10 @@ const register = async (data) => {
     session_id,
   };
 
-  const newAccessToken = await JWT.generateAccessToken(payload);
-  const newRefreshToken = await JWT.generateRefreshToken(payload);
+  const accessToken = await JWT.generateAccessToken(payload);
+  const refreshToken = await JWT.generateRefreshToken(payload);
 
-  const hashedToken = await HashUtils.hashToken(newRefreshToken);
+  const hashedToken = await HashUtils.hashToken(refreshToken);
 
   await AuthRepository.createToken({
     token_id: session_id,
@@ -44,8 +44,8 @@ const register = async (data) => {
 
   return {
     user,
-    newAccessToken,
-    newRefreshToken,
+    accessToken,
+    refreshToken,
   };
 };
 
@@ -71,10 +71,10 @@ const login = async (data) => {
     session_id,
   };
   
-  const newAccessToken = await JWT.generateAccessToken(payload);
-  const newRefreshToken = await JWT.generateRefreshToken(payload);
+  const accessToken = await JWT.generateAccessToken(payload);
+  const refreshToken = await JWT.generateRefreshToken(payload);
   
-  const hashedToken = await HashUtils.hashToken(newRefreshToken);
+  const hashedToken = await HashUtils.hashToken(refreshToken);
   
   await AuthRepository.createToken({
     token_id: session_id,
@@ -92,15 +92,15 @@ const login = async (data) => {
       avatar_url: user.avatar_url,
       is_active: user.is_active,
     }, 
-    newAccessToken,
-    newRefreshToken
+    accessToken,
+    refreshToken
   };
 };
 
 const logout = async(payload) => {
   const { session_id, userId } = payload;
   
-  if(!user_id) throw new Error("User not found");
+  if(!userId) throw new Error("User not found");
   
   const session = 
     await AuthRepository.findTokenBySession({token_id: session_id})
@@ -117,9 +117,9 @@ const logout = async(payload) => {
 
 // GET ME
 const getMe = async (userId) => {
-  if(!user_id) throw new Error("User id not found")
+  if(!userId) throw new Error("User id not found")
   
-  const user = await findUserByIdRepo(userId);
+  const user = await AuthRepository.findUserById(userId);
   
   if (!user) {
     throw new Error("User not found");

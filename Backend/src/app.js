@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
+import routes from "./routes/index.js";
 
 import { 
   loggerMiddleware } from './middlewares/logger.middleware.js';
@@ -41,6 +42,7 @@ app.use(loggerMiddleware);
 app.use('/api/', limiter);
 
 // API Routes
+app.use("/api/v1", routes);
 
 // Health Check
 app.get('/api/v1/health', (req, res) => {

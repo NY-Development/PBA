@@ -1,4 +1,4 @@
-import { sql } from "../../config/db.js";
+import { sql } from "../../configs/db.js";
 
 const findUserByEmail = async (email) => {
   const result = await sql`
@@ -61,10 +61,19 @@ const revokeToken = async ({ session_id, user_id }) => {
   return result[0] || null
 };
 
-const findById = async (id) => {
+const findUserById = async (id) => {
   const result = await sql`
     SELECT * FROM users 
     WHERE id = ${id}
   `;
   return result[0] || null;
 };
+
+export const AuthRepository = {
+  findUserByEmail,
+  register,
+  createToken,
+  findTokenBySession,
+  revokeToken,
+  findUserById
+}
