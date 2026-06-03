@@ -4,7 +4,7 @@ import { Cookie } from "../../utils/cookies.js"
 import logger from "../../utils/logger.js"
 
 // REGISTER
-export const registerUser = async (req, res) => {
+const register = async (req, res) => {
   try {
     const {
       user,
@@ -31,7 +31,7 @@ export const registerUser = async (req, res) => {
 
 
 // LOGIN
-export const loginUser = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { 
       user, 
@@ -57,7 +57,7 @@ export const loginUser = async (req, res) => {
 };
 
 // LOGOUT
-export const logoutUser = async(req, res) => {
+const logout = async(req, res) => {
   try{
     await AuthService.logout(req.user.userId)
     
@@ -76,7 +76,7 @@ export const logoutUser = async(req, res) => {
 
 
 // GET ME / CURRENT USER
-export const getMe = async (req, res) => {
+const getMe = async (req, res) => {
   try {
     const user = await AuthService.getMe(req.user.userId);
   
@@ -93,3 +93,10 @@ export const getMe = async (req, res) => {
     });
   }
 };
+
+export const AuthController = {
+  register,
+  login,
+  logout,
+  getMe
+}
