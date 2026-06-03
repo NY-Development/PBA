@@ -27,6 +27,9 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const SERVER_ORIGIN = process.env.SERVER_ORIGIN;
 
+// EMAIL VERIFICATIONS
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
 
 export const Env = {
@@ -46,5 +49,8 @@ export const Env = {
   PORT,
   NODE_ENV,
   CLIENT_ORIGIN,
-  SERVER_ORIGIN
+  SERVER_ORIGIN,
+  
+  EMAIL_USER,
+  EMAIL_PASS,
 }
