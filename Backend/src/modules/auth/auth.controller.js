@@ -59,12 +59,12 @@ const login = async (req, res) => {
 // LOGOUT
 const logout = async(req, res) => {
   try{
-    await AuthService.logout(req.user.userId)
+    await AuthService.logout(req.user)
     
     await Cookie.clearRefreshToken(res)
   
     return res.status(200).json({
-      message: "Logged out successfully"
+      message: "Logged out successfully, session and token deleted"
     });
   }catch(err){
     logger.error("Logout error:", err.message);

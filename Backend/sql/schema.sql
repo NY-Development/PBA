@@ -17,9 +17,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS refresh_tokens (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  token       TEXT NOT NULL UNIQUE,
+  token       TEXT NOT NULL,
+  revoked     BOOLEAN DEFAULT FALSE,
   expires_at  TIMESTAMPTZ NOT NULL,
-  created_at  TIMESTAMPTZ DEFAULT NOW()
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- vendors
@@ -46,7 +48,7 @@ CREATE TABLE IF NOT EXISTS categories (
 -- products
 CREATE TABLE IF NOT EXISTS products (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  vendor_id         UUID NOT NULL REFERENCES vendor_profiles(id) ON DELETE CASCADE,
+  vendor_id         UUID NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
   category_id       UUID REFERENCES categories(id),
   name              VARCHAR(255) NOT NULL,
   description       TEXT,
@@ -67,7 +69,7 @@ CREATE TABLE IF NOT EXISTS addresses (
 );
 
 -- orders
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES users(id),
   address_id      UUID REFERENCES addresses(id),
@@ -82,7 +84,7 @@ CREATE TABLE orders (
 );
 
 -- order_items
-CREATE TABLE order_items (
+CREATE TABLE IF NOT EXISTS order_items (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id     UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   product_id   UUID NOT NULL REFERENCES products(id),
@@ -92,7 +94,7 @@ CREATE TABLE order_items (
 );
 
 -- carts
-CREATE TABLE cart_items (
+CREATE TABLE IF NOT EXISTS cart_items (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
@@ -102,19 +104,21 @@ CREATE TABLE cart_items (
 );
 
 -- reviews
-CREATE TABLE reviews (
+CREATE TABLE IF NOT EXISTS reviews (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id),
   rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment        TEXT,
   created_at  TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(product_id, customer_id)
+  UNIQUE(product_id, user_id)
 );
 
 -- Indexes for performance
-CREATE INDEX idx_products_vendor   ON products(vendor_id);
-CREATE INDEX idx_products_category ON products(category_id);
-CREATE INDEX idx_orders_customer   ON orders(customer_id);
-CREATE INDEX idx_order_items_order ON order_items(order_id);
-CREATE INDEX idx_reviews_product   ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_products_vendor   ON products(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user   ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_product   ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_id   ON refresh_tokens(id);
+CREATE INDEX IF NOT EXISTS indx_refresh_revoked ON refresh_tokens(is_revoked);

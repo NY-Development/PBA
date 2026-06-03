@@ -6,7 +6,7 @@ dotenv.config();
 const DATABASE_URL = process.env.DATABASE_URL;
 
 // REDIS URL
-const REDIS_URL = process.env.REDIS_URL;
+const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6380";
 
 // ACCESS TOKEN AND COOKIE
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;

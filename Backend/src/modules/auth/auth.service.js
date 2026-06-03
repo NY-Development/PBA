@@ -1,4 +1,4 @@
-
+import { randomUUID } from "crypto";
 import { HashUtils } from "../../utils/hash.js";
 import { JWT } from "../../utils/jwt.js";
 import { AuthRepository } from "./auth.repository.js";
@@ -7,55 +7,53 @@ import { AuthRepository } from "./auth.repository.js";
 // REGISTER
 const register = async (data) => {
   const { first_name, last_name, email, password } = data;
-  
-  const existing = await AuthRepository.findByEmail(email);
-  
+
+  const existing = await AuthRepository.findUserByEmail(email);
+
   if (existing) {
     throw new Error("User with this email already exists");
   }
 
   const hashedPassword = await HashUtils.hashPassword(password);
-  
-  const user = await AuthRepository.register(
+
+  const user = await AuthRepository.register({
     first_name,
     last_name,
     email,
-    hashedPassword
-  );
-  
-  const payload = { 
-    user: user.id, 
-    role: user.role, 
-    email: user.email 
+    password: hashedPassword
+  });
+
+  const session_id = randomUUID();
+
+  const payload = {
+    userId: user.id,
+    role: user.role,
+    session_id,
   };
-  
+
   const newAccessToken = await JWT.generateAccessToken(payload);
   const newRefreshToken = await JWT.generateRefreshToken(payload);
-  
-  const hashedToken = await HashUtils.hashToken(newRefreshToken);
-  
-  await AuthRepository.createToken(user.id, hashedToken);
 
-  return { 
-    user:{
-      id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      role: user.role,
-      avatar_url: user.avatar_url,
-      is_active: user.is_active,
-      
-    }, 
-    newAccessToken, 
-    newRefreshToken };
+  const hashedToken = await HashUtils.hashToken(newRefreshToken);
+
+  await AuthRepository.createToken({
+    token_id: session_id,
+    user_id: user.id,
+    token: hashedToken
+  });
+
+  return {
+    user,
+    newAccessToken,
+    newRefreshToken,
   };
+};
 
 // LOGIN
 const login = async (data) => {
   const { email, password } = data;
   
-  const user = await AuthRepository.findByEmail(email);
+  const user = await AuthRepository.findUserByEmail(email);
   
   if (!user) throw new Error("User with this email doesn't exist");
   
@@ -65,12 +63,12 @@ const login = async (data) => {
   
   if (!user.is_active) throw new Error("Account banned or deactivated, please contact support");
   
-  if(!tokenMatch) throw new Error("Invalid")
+  const session_id = randomUUID();
   
-  const payload = { 
-    user: user.id, 
-    role: user.role, 
-    email: user.email 
+  const payload = {
+    userId: user.id,
+    role: user.role,
+    session_id,
   };
   
   const newAccessToken = await JWT.generateAccessToken(payload);
@@ -78,7 +76,11 @@ const login = async (data) => {
   
   const hashedToken = await HashUtils.hashToken(newRefreshToken);
   
-  await AuthRepository.updateToken(user.id, hashedToken);
+  await AuthRepository.createToken({
+    token_id: session_id,
+    user_id: user.id,
+    token: hashedToken
+  });
   
   return { 
     user:{
@@ -95,10 +97,20 @@ const login = async (data) => {
   };
 };
 
-const logout = async(user_id) => {
-  if(!user_id) throw new Error("User id not found");
+const logout = async(payload) => {
+  const { session_id, userId } = payload;
   
-  const result = await AuthRepository.updateToken(user_id, null);
+  if(!user_id) throw new Error("User not found");
+  
+  const session = 
+    await AuthRepository.findTokenBySession({token_id: session_id})
+    
+  if(session.revoked) throw new Error("This session has already been revoked")
+  
+  const result = await AuthRepository.revokeToken({
+    user_id: userId,
+    session_id
+  });
   
   return result;
 };
