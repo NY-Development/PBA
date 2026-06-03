@@ -104,7 +104,9 @@ const logout = async(payload) => {
   
   const session = 
     await AuthRepository.findTokenBySession({token_id: session_id})
-    
+  
+  if (!session) throw new Error("Session not found");
+  
   if(session.revoked) throw new Error("This session has already been revoked")
   
   const result = await AuthRepository.revokeToken({
@@ -127,9 +129,49 @@ const getMe = async (userId) => {
   return user;
 };
 
+const refresh = async(oldRefreshToken, payloadData) => {
+  const { userId, session_id } = payloadData;
+  
+  if(!userId) throw new Error("User id not found")
+  
+  const user = await AuthRepository.findUserById(userId);
+  
+  if(!user) throw new Error("User not found")
+  
+  const session = 
+    await AuthRepository.findTokenBySession({token_id: session_id})
+  
+  if (!session) throw new Error("Session not found");
+
+  if (session.revoked)
+    throw new Error("This session has already been revoked");
+  
+  if (!session.token)
+    throw new Error("Refresh token not found");
+  
+  if(!session.token) throw new Error("Refresh Token not found")
+  
+  const isTokenValid = await HashUtils.compareToken(
+    oldRefreshToken, session.token
+  )
+  
+  if(!isTokenValid) throw new Error("Token expired or invalid")
+  
+  const payload = {
+    userId: user.id,
+    role: user.role,
+    session_id,
+  };
+  
+  const newAccessToken = await JWT.generateAccessToken(payload)
+  
+  return { newAccessToken };
+}
+
 export const AuthService = {
   register,
   login,
   logout,
+  refresh,
   getMe
 }

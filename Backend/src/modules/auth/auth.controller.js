@@ -78,7 +78,6 @@ const logout = async(req, res) => {
 // GET ME / CURRENT USER
 const getMe = async (req, res) => {
   try {
-    console.log(req.user)
     const user = await AuthService.getMe(req.user.userId);
     
     return res.status(200).json({
@@ -95,9 +94,30 @@ const getMe = async (req, res) => {
   }
 };
 
+const refresh = async (req, res) => {
+  try {
+    console.log(req.user)
+    const { newAccessToken } = 
+      await AuthService.refresh(req.cookies.refreshToken, req.user);
+    
+    return res.status(200).json({
+      message: "Token refreshed successfully",
+      newAccessToken
+    });
+
+  } catch (err) {
+    logger.error("Refresh error:", err.message);
+
+    return res.status(500).json({
+      message: err.message
+    });
+  }
+};
+
 export const AuthController = {
   register,
   login,
   logout,
+  refresh,
   getMe
 }
