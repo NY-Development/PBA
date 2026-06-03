@@ -69,11 +69,32 @@ const findUserById = async (id) => {
   return result[0] || null;
 };
 
+const updateUser = async(data, user_id) => {
+  const {
+    first_name,
+    last_name,
+    avatar_url } = data;
+  
+  const result = await sql`
+    UPDATE 
+      users
+    SET 
+      first_name = COALESCE(${first_name}, first_name),
+      last_name = COALESCE(${last_name}, last_name),
+      avatar_url = COALESCE(${avatar_url}, avatar_url)
+    WHERE id=${user_id}
+    RETURNING *
+  `
+  
+  return result[0] || null;
+};
+
 export const AuthRepository = {
   findUserByEmail,
   register,
   createToken,
   findTokenBySession,
   revokeToken,
+  updateUser,
   findUserById
 }

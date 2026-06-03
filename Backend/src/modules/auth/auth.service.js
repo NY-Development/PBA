@@ -166,12 +166,31 @@ const refresh = async(oldRefreshToken, payloadData) => {
   const newAccessToken = await JWT.generateAccessToken(payload)
   
   return { newAccessToken };
-}
+};
+
+const updateUser = async(data, userId) => {
+  const {
+    first_name,
+    last_name,
+    avatar_url } = data;
+  
+  if(!userId) throw new Error("User id not found")
+  
+  const user = await AuthRepository.findUserById(userId);
+  
+  if(!user) throw new Error("User not found")
+  
+  const result = await AuthRepository.updateUser(data, userId)
+  
+  return result;
+};
+
 
 export const AuthService = {
   register,
   login,
   logout,
   refresh,
+  updateUser,
   getMe
 }

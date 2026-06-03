@@ -114,10 +114,32 @@ const refresh = async (req, res) => {
   }
 };
 
+const update = async (req, res) => {
+  try {
+    const updatedUser = await AuthService.updateUser(
+      req.body, 
+      req.user.userId
+    );
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    logger.error("Update user error:", error.message);
+
+    return res.status(400).json({
+      message: error.message || "Failed to update user"
+    });
+  }
+};
+
 export const AuthController = {
   register,
   login,
   logout,
   refresh,
+  update,
   getMe
 }
