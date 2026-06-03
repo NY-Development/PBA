@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Surface & Backgrounds */
+    --background: 20 50% 98%; /* #fff8f5 - Light Cream/Beige */
+    --foreground: 12 28% 12%; /* #3E2723 - Deep Peanut Brown */
+    
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 12 28% 12%; /* #3E2723 */
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 12 28% 12%;
+    
+    /* Brand Colors */
+    --primary: 33 82% 51%; /* #ec7f13 - Peanut Orange (Brand Core) */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 14 25% 30%; /* #5D4037 - Toasted Brown */
+    --secondary-foreground: 20 50% 98%;
+    
+    /* Accents & Highlights */
+    --accent: 36 78% 57%; /* #C39B5F - Golden Peanut */
+    --accent-foreground: 12 28% 12%;
+    
+    --muted: 22 40% 92%; /* #ead6cb - Surface Dim / Soft Almond */
+    --muted-foreground: 14 15% 45%;
+    
+    /* Semantic Colors */
+    --destructive: 0 63% 51%; /* #D32F2F - Soft Red */
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 122 39% 49%; /* #4CAF50 - Muted Green */
+    --warning: 42 100% 50%; /* #FFB300 - Warm Amber */
+    
+    /* Borders & Inputs */
+    --border: 20 20% 90%; /* Soft tan border */
+    --input: 20 20% 90%;
+    --ring: 33 82% 51%; /* Peanut Orange focus */
+    
+    --radius: 0.5rem; /* ROUND_EIGHT - 8px */
+    
+    /* Charts & Data Viz (Peanut Spectrum) */
+    --chart-1: 33 82% 51%; /* Orange */
+    --chart-2: 14 25% 30%; /* Dark Brown */
+    --chart-3: 36 78% 57%; /* Golden */
+    --chart-4: 37 95% 62%; /* Warm Gold */
+    --chart-5: 12 28% 12%; /* Deep Brown */
+  }
+
+  .dark:root {
+    /* Deep Peanut Brown as Dark Base */
+    --background: 12 28% 8%; /* Darker Peanut Brown */
+    --foreground: 20 50% 98%; /* Light Cream Text */
+    
+    --card: 12 28% 12%; /* #3E2723 */
+    --card-foreground: 20 50% 98%;
+    
+    --popover: 12 28% 12%;
+    --popover-foreground: 20 50% 98%;
+    
+    --primary: 33 82% 51%; /* Stays Orange */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 14 15% 20%;
+    --secondary-foreground: 20 50% 98%;
+    
+    --muted: 14 15% 20%;
+    --muted-foreground: 14 15% 70%;
+    
+    --accent: 36 78% 57%;
+    --accent-foreground: 20 50% 98%;
+    
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 14 15% 25%;
+    --input: 14 15% 25%;
+    --ring: 33 82% 51%;
+    
+    --chart-1: 33 82% 51%;
+    --chart-2: 36 78% 57%;
+    --chart-3: 37 95% 62%;
+    --chart-4: 20 50% 98%;
+    --chart-5: 42 100% 50%;
+  }
+}
