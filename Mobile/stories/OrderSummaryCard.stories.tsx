@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { OrderSummaryCard } from '@/components/OrderSummaryCard';
+import { OrderSummaryCard } from '@/components/common/OrderSummaryCard';
 
 export default {
   title: 'Components/OrderSummaryCard',

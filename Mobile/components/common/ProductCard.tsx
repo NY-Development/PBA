@@ -29,7 +29,7 @@ export function ProductCard({
   return (
     <Pressable 
       onPress={onCardPress} 
-      className="bg-card rounded-[16px] p-3 w-[48%] mb-4 border border-border shadow-sm active:opacity-95"
+      className="bg-card rounded-[16px] p-3 w-[180px] border border-border shadow-sm active:opacity-95"
     >
       <View className="relative w-full aspect-square rounded-[12px] overflow-hidden bg-muted">
         <Image source={{ uri: imageUri }} className="w-full h-full object-cover" />

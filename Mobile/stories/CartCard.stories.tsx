@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { CartCard } from '@/components/CartCard';
+import { CartCard } from '@/components/common/CartCard';
 
 export default {
   title: 'Components/CartCard',

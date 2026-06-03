@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ScrollView } from 'react-native';
-import { GroupBuyCard } from '@/components/GroupBuyCard';
+import { GroupBuyCard } from '@/components/common/GroupBuyCard';
 
 export default {
   title: 'Components/GroupBuyCard',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { CustomAccordion } from '@/components/CustomAccordion';
+import { CustomAccordion } from '@/components/common/CustomAccordion';
 import { Text } from '@/components/ui/text';
 
 export default {

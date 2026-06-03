@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductCard } from '@/components/common/ProductCard';
 
 export default {
   title: 'Components/ProductCard',

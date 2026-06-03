@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { CustomButton } from '@/components/CustomButton';
+import { CustomButton } from '@/components/common/CustomButton';
 import { ArrowRight, ShoppingBag } from 'lucide-react-native';
 
 export default {

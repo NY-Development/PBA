@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView } from 'react-native';
-import { OrderedProductCard } from '@/components/OrderedProductCard';
+import { OrderedProductCard } from '@/components/common/OrderedProductCard';
 
 export default {
   title: 'Components/OrderedProductCard',

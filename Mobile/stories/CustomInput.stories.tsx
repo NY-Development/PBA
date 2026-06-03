@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { CustomInput } from '@/components/CustomInput';
+import { CustomInput } from '@/components/common/CustomInput';
 import { Search, MapPin, EyeOff } from 'lucide-react-native';
 
 export default {

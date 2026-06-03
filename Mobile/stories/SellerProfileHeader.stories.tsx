@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { SellerProfileHeader } from '@/components/SellerProfileHeader';
+import { SellerProfileHeader } from '@/components/common/SellerProfileHeader';
 
 export default {
   title: 'Components/SellerProfileHeader',
