@@ -181,6 +181,21 @@ const forgotPassword = async(req, res) => {
   }
 }
 
+const resetPassword = async(req, res) => {
+  try{
+    await AuthService.resetPassword(req.body);
+    
+    res.status(200).json({
+      message: "Password reset successfully"
+    })
+  }catch(err){
+    logger.error("Password reset failed:", err.message);
+    res.status(500).json({
+      message: err.message
+    })
+  }
+}
+
 
 export const AuthController = {
   register,
@@ -190,5 +205,6 @@ export const AuthController = {
   update,
   getMe,
   verifyEmail,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 }

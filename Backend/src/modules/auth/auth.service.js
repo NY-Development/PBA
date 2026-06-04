@@ -116,6 +116,8 @@ const verifyEmail = async ({ email, otp }) => {
       "OTP expired or registration not found"
     );
   }
+  
+  if(!otp) throw new Error("OTP not provided")
 
   // 2. Compare OTP
   const isOtpValid =
@@ -308,6 +310,42 @@ const forgotPassword = async({email}) => {
   
 }
 
+const resetPassword = async({email, otp, password}) => {
+  const cacheKey = `forgot_password:${email}`;
+  
+  const pendingUser = await CacheService.get(cacheKey);
+  
+  if (!pendingUser) {
+    throw new Error(
+      "OTP expired or registration not found"
+    );
+  }
+  
+  if(!otp) throw new Error("OTP not provided")
+
+  const isOtpValid =
+    await HashUtils.compareOTP(
+      otp,
+      pendingUser.otp
+    );
+
+  if (!isOtpValid) {
+    throw new Error("Invalid OTP");
+  }
+  
+  const hashedPassword = await HashUtils.hashPassword(password)
+  
+  await AuthRepository.resetPassword({
+    email, 
+    password: hashedPassword 
+  });
+  
+  return {
+    message: "Password reset successfully"
+  }
+  
+}
+
 
 export const AuthService = {
   register,
@@ -317,5 +355,6 @@ export const AuthService = {
   updateUser,
   getMe,
   verifyEmail,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 }

@@ -114,15 +114,6 @@ CREATE TABLE IF NOT EXISTS reviews (
   UNIQUE(product_id, user_id)
 );
 
--- email verifications
-CREATE TABLE IF NOT EXISTS email_verifications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  otp TEXT NOT NULL,
-  expires_at TIMESTAMP NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_products_vendor   ON products(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);

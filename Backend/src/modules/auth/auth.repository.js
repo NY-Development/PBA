@@ -89,30 +89,15 @@ const updateUser = async(data, user_id) => {
   return result[0] || null;
 };
 
-const deleteOldOTPs = async(user_id) => {
+const resetPassword = async({email, password}) => {
   const result = await sql`
-    DELETE FROM email_verifications
-    WHERE user_id = ${user_id}
-    RETURNING *
-  `;
-
-  return result[0] || null;
-}
-
-const createOTP = async({
-  user_id,
-  otp,
-  expires_at,}) => {
-  const result = await sql`
-    INSERT INTO email_verifications
-      (user_id, otp, expires_at)
-    VALUES
-      (${user_id}, ${otp}, ${expires_at})
+    UPDATE users
+    SET password=${password}
+    WHERE email=${email}
     RETURNING *
   `
   return result[0] || null;
 }
-
 
 
 export const AuthRepository = {
@@ -123,6 +108,5 @@ export const AuthRepository = {
   revokeToken,
   updateUser,
   findUserById,
-  createOTP,
-  deleteOldOTPs
+  resetPassword
 }
