@@ -12,7 +12,7 @@ export const sendVerificationEmail = async ({ to, otp }) => {
       html: verificationEmailTemplate(otp),
     });
     
-    console.log(`✨ Verification email sent to ${to}. Message ID: ${info.messageId}`);
+    console.log(`✨ Verification code sent to ${to}. Message ID: ${info.messageId}`);
     
     return info;
   } catch (error) {

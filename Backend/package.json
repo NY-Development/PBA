@@ -22,11 +22,13 @@
     "api",
     "dashboard"
   ],
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "nodemon src/server.js",
-    "dev": "nodemon src/server.js"
+    "version": "1.0.0",
+    "main": "server.js",
+    "scripts": {
+    "start": "node src/server.js",
+    "server": "nodemon src/server.js",
+    "redis": "redis-server --port 6380",
+    "dev": "concurrently \"npm run redis\" \"npm run server\""
   },
   "license": "ISC",
   "type": "module",
