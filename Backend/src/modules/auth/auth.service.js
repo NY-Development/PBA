@@ -28,7 +28,7 @@ const register = async (data) => {
   const hashedOTP = await HashUtils.hashOTP(otp);
 
   // 4. Cache pending user
-  const cacheKey = `pending_user:${email}`;
+  const cacheKey = `otp:register:${email}`;
 
   const userData = {
     first_name,
@@ -106,7 +106,7 @@ const login = async (data) => {
 // EMAIL VERIFICATION
 const verifyEmail = async ({ email, otp }) => {
   // 1. Get pending user
-  const cacheKey = `pending_user:${email}`;
+  const cacheKey = `otp:register:${email}`;
 
   const pendingUser =
     await CacheService.get(cacheKey);
@@ -283,7 +283,7 @@ const forgotPassword = async({email}) => {
     throw new Error("Your account temporarily locked");
   }
   
-  const cacheKey = `forgot_password:${email}`
+  const cacheKey = `otp:reset:${email}`
   
   const otp = createOTP();
   const hashedOTP = await HashUtils.hashOTP(otp);
@@ -311,7 +311,7 @@ const forgotPassword = async({email}) => {
 }
 
 const resetPassword = async({email, otp, password}) => {
-  const cacheKey = `forgot_password:${email}`;
+  const cacheKey = `otp:reset:${email}`;
   
   const pendingUser = await CacheService.get(cacheKey);
   
@@ -340,11 +340,43 @@ const resetPassword = async({email, otp, password}) => {
     password: hashedPassword 
   });
   
+  await CacheService.del(cacheKey);
+  
   return {
     message: "Password reset successfully"
   }
   
 }
+
+const resendOTP = async ({ email, type }) => {
+  if(!type) throw new Error("OTP type not provided")
+  
+  const cacheKey = `otp:${type}:${email}`;
+
+  const existing = await AuthRepository.findUserByEmail(email);
+
+  if (!existing) throw new Error("User not found");
+
+  const otp = createOTP();
+  const hashedOTP = await HashUtils.hashOTP(otp);
+  
+  const userData = {
+    email,
+    otp: hashedOTP,
+  }
+
+  await CacheService.set(cacheKey, userData, 600);
+
+  await sendVerificationEmail({
+    to: email,
+    otp,
+  });
+
+  return {
+    message: "OTP resent successfully",
+  };
+};
+
 
 
 export const AuthService = {
@@ -356,5 +388,6 @@ export const AuthService = {
   getMe,
   verifyEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  resendOTP
 }
