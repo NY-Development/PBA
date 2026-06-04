@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 
 -- email verifications
-CREATE TABLE email_verifications (
+CREATE TABLE IF NOT EXISTS email_verifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   otp TEXT NOT NULL,
@@ -130,4 +130,5 @@ CREATE INDEX IF NOT EXISTS idx_orders_user   ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_product   ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_id   ON refresh_tokens(id);
-CREATE INDEX IF NOT EXISTS indx_refresh_revoked ON refresh_tokens(is_revoked);
+CREATE INDEX IF NOT EXISTS idx_refresh_revoked ON refresh_tokens(is_revoked);
+CREATE INDEX IF NOT EXISTS idx_email_otp ON email_verifications(otp);

@@ -3,10 +3,16 @@ import { testDBConnection } from "./configs/db.js";
 import { Env } from "./configs/env.js";
 import logger from "./utils/logger.js";
 import { connectRedis } from './configs/redis.js';
+import { transporter } from './configs/email.js';
 
 
 const startServer = async () => {
   try {
+    // 0. Warmup SMTP
+    transporter.verify()
+      .then(() => console.log("SMTP ready"))
+      .catch(console.error);
+    
     // 1. Connect to Database (Neon)
     await testDBConnection();
 

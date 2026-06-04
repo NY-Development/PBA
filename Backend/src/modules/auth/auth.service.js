@@ -1,51 +1,57 @@
 import { randomUUID } from "crypto";
 import { HashUtils } from "../../utils/hash.js";
+import { CacheService } from "../../utils/cache.js";
 import { JWT } from "../../utils/jwt.js";
 import { AuthRepository } from "./auth.repository.js";
+import { createOTP } from "../../services/otp/otp.service.js"
+import { sendVerificationEmail } from "../../services/email/email.service.js"
 
 
 // REGISTER
 const register = async (data) => {
   const { first_name, last_name, email, password } = data;
 
+  // 1. Check existing user
   const existing = await AuthRepository.findUserByEmail(email);
 
   if (existing) {
     throw new Error("User with this email already exists");
   }
 
-  const hashedPassword = await HashUtils.hashPassword(password);
+  // 2. Hash password
+  const hashedPassword =
+    await HashUtils.hashPassword(password);
 
-  const user = await AuthRepository.register({
+  // 3. Generate OTP
+  const otp = createOTP();
+  
+  const hashedOTP = await HashUtils.hashOTP(otp);
+
+  // 4. Cache pending user
+  const cacheKey = `pending_user:${email}`;
+
+  const userData = {
     first_name,
     last_name,
     email,
-    password: hashedPassword
-  });
-
-  const session_id = randomUUID();
-
-  const payload = {
-    userId: user.id,
-    role: user.role,
-    session_id,
+    password: hashedPassword,
+    otp: hashedOTP,
   };
 
-  const accessToken = await JWT.generateAccessToken(payload);
-  const refreshToken = await JWT.generateRefreshToken(payload);
+  await CacheService.set(
+    cacheKey,
+    userData,
+    600
+  );
 
-  const hashedToken = await HashUtils.hashToken(refreshToken);
-
-  await AuthRepository.createToken({
-    token_id: session_id,
-    user_id: user.id,
-    token: hashedToken
+  // 5. Send email
+  sendVerificationEmail({
+    to: email,
+    otp,
   });
 
   return {
-    user,
-    accessToken,
-    refreshToken,
+    message: "OTP sent successfully to your email, please check your email",
   };
 };
 
@@ -96,6 +102,84 @@ const login = async (data) => {
     refreshToken
   };
 };
+
+// EMAIL VERIFICATION
+const verifyEmail = async ({ email, otp }) => {
+  // 1. Get pending user
+  const cacheKey = `pending_user:${email}`;
+
+  const pendingUser =
+    await CacheService.get(cacheKey);
+
+  if (!pendingUser) {
+    throw new Error(
+      "OTP expired or registration not found"
+    );
+  }
+
+  // 2. Compare OTP
+  const isOtpValid =
+    await HashUtils.compareOTP(
+      otp,
+      pendingUser.otp
+    );
+
+  if (!isOtpValid) {
+    throw new Error("Invalid OTP");
+  }
+
+  // 3. Create real user
+  const user =
+    await AuthRepository.register({
+      first_name: pendingUser.first_name,
+      last_name: pendingUser.last_name,
+      email: pendingUser.email,
+      password: pendingUser.password,
+    });
+
+  // 4. Delete pending registration
+  await CacheService.del(cacheKey);
+
+  // 5. Create session
+  const session_id = randomUUID();
+
+  const payload = {
+    userId: user.id,
+    role: user.role,
+    session_id,
+  };
+
+  // 6. Generate tokens
+  const accessToken =
+    await JWT.generateAccessToken(payload);
+
+  const refreshToken =
+    await JWT.generateRefreshToken(payload);
+
+  // 7. Hash refresh token
+  const hashedToken =
+    await HashUtils.hashToken(refreshToken);
+
+  // 8. Save refresh session
+  await AuthRepository.createToken({
+    token_id: session_id,
+    user_id: user.id,
+    token: hashedToken,
+  });
+
+  return {
+    user: {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      role: user.role,
+    },
+    accessToken,
+    refreshToken,
+  };
+};
+
 
 const logout = async(payload) => {
   const { session_id, userId } = payload;
@@ -192,5 +276,6 @@ export const AuthService = {
   logout,
   refresh,
   updateUser,
-  getMe
+  getMe,
+  verifyEmail
 }

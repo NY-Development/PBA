@@ -6,29 +6,59 @@ import logger from "../../utils/logger.js"
 // REGISTER
 const register = async (req, res) => {
   try {
-    const {
-      user,
-      accessToken,
-      refreshToken
-    } = await AuthService.register(req.body);
-    
-    await Cookie.setRefreshToken(res, refreshToken)
+    const message = await AuthService.register(req.body);
 
-    return res.status(201).json({
-      message: "User registered successfully",
-      user,
-      accessToken
+    return res.status(200).json({
+      message,
     });
 
   } catch (error) {
-    logger.error("Error registering user:", error);
+    logger.error(
+      "Error registering user:",
+      error
+    );
 
     return res.status(400).json({
-      message: error.message
+      message: error.message,
     });
   }
 };
 
+// EMAIL VERIFICATION 
+const verifyEmail = async (req, res) => {
+  try {
+    const {
+      user,
+      accessToken,
+      refreshToken,
+    } = await AuthService.verifyEmail(
+      req.body
+    );
+
+    // set refresh cookie
+    await Cookie.setRefreshToken(
+      res,
+      refreshToken
+    );
+
+    return res.status(201).json({
+      message:
+        "Email verified successfully",
+      user,
+      accessToken,
+    });
+
+  } catch (error) {
+    logger.error(
+      "Verify email error:",
+      error.message
+    );
+
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
 
 // LOGIN
 const login = async (req, res) => {
@@ -141,5 +171,6 @@ export const AuthController = {
   logout,
   refresh,
   update,
-  getMe
+  getMe,
+  verifyEmail
 }

@@ -1,4 +1,4 @@
-import { redisClient } from '../config/redis.js';
+import { redisClient } from '../configs/redis.js';
 import logger from './logger.js';
 
 const get = async(key) => {

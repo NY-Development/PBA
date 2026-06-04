@@ -31,10 +31,25 @@ const compareToken = async (token, hashedToken) => {
   return isMatch;
 }
 
+// OTP HASH AND VERIFICATION
+const hashOTP = async (otp) => {
+  const hashed = await bcrypt.hash(otp, Env.SALT_ROUNDS);
+  
+  return hashed;
+}
+
+const compareOTP = async (otp, hashedOTP) => {
+  const isMatch = await bcrypt.compare(otp, hashedOTP)
+  
+  return isMatch;
+}
+
 
 export const HashUtils = {
   hashPassword,
   hashToken,
   comparePassword,
-  compareToken
+  compareToken,
+  hashOTP,
+  compareOTP
 }
