@@ -165,6 +165,7 @@ const update = async (req, res) => {
   }
 };
 
+
 export const AuthController = {
   register,
   login,

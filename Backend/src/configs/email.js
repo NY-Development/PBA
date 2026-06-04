@@ -2,14 +2,11 @@ import nodemailer from "nodemailer";
 import { Env } from "./env.js";
 
 export const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
+  host: "smtp-relay.brevo.com",
+  port: 2525,
   secure: false,
   auth: {
-    user: Env.SENDER_EMAIL,
-    pass: Env.SENDER_PASS,
-  },
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
+    user: Env.SMTP_USER,
+    pass: Env.SMTP_PASS,
+  }
 });

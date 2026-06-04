@@ -29,8 +29,12 @@ const SERVER_ORIGIN = process.env.SERVER_ORIGIN;
 
 // EMAIL VERIFICATIONS
 const SENDER_PASS = process.env.SENDER_PASS;
-const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
+
+// BREVO VERIFICATIONS
+const SMTP_PASS = process.env.SMTP_PASS;
+const SMTP_USER = process.env.SMTP_USER;
+const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
 export const Env = {
   DATABASE_URL,
@@ -52,5 +56,6 @@ export const Env = {
   SERVER_ORIGIN,
   
   SENDER_EMAIL,
-  SENDER_PASS
+  SMTP_USER,
+  SMTP_PASS,
 }

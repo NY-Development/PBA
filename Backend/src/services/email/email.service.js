@@ -6,7 +6,7 @@ export const sendVerificationEmail = async ({ to, otp }) => {
   try {
     
     const info = await transporter.sendMail({
-      from: Env.SENDER_EMAIL,
+      from: `"Peanut Store" <${Env.SENDER_EMAIL}>`,
       to,
       subject: `Your verification code is ${otp}`,
       html: verificationEmailTemplate(otp),
