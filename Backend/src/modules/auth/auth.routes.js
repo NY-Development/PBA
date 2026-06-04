@@ -14,5 +14,9 @@ router.post(
   "/verify-email",
   AuthController.verifyEmail
 );
+router.post(
+  "/forgot-password",
+  AuthController.forgotPassword
+);
 
 export default router;

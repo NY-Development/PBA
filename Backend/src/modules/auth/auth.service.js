@@ -269,6 +269,45 @@ const updateUser = async(data, userId) => {
   return result;
 };
 
+const forgotPassword = async({email}) => {
+  
+  const existing = await AuthRepository.findUserByEmail(email);
+
+  if (!existing) {
+    throw new Error("User with this email doesn't exist");
+  }
+  
+  if (!existing.is_active) {
+    throw new Error("Your account temporarily locked");
+  }
+  
+  const cacheKey = `forgot_password:${email}`
+  
+  const otp = createOTP();
+  const hashedOTP = await HashUtils.hashOTP(otp);
+  
+  const userData = {
+    email,
+    otp: hashedOTP,
+  };
+  
+  await CacheService.set(
+    cacheKey,
+    userData,
+    600
+  );
+  
+  sendVerificationEmail({
+    to: email,
+    otp,
+  });
+
+  return {
+    message: "OTP sent successfully to your email, please check your email",
+  };
+  
+}
+
 
 export const AuthService = {
   register,
@@ -277,5 +316,6 @@ export const AuthService = {
   refresh,
   updateUser,
   getMe,
-  verifyEmail
+  verifyEmail,
+  forgotPassword
 }
