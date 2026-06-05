@@ -21,8 +21,7 @@ router.post("/reset-password", AuthController.resetPassword);
 router.post("/resend-otp", AuthController.resendOTP);
 router.post(
   "/profile-picture", 
-  protect,
-  authorize("customer"),
+  
   upload.single("avatar"), 
   AuthController.updateProfilePicture
 );

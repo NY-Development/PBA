@@ -17,3 +17,22 @@ export const uploadToCloudinary = (buffer, folder, options = {}) => {
     stream.end(buffer);
   });
 };
+
+export const deleteFromCloudinary = async (
+  publicId,
+  resourceType = "image"
+) => {
+  try {
+    const result = await cloudinary.uploader.destroy(
+      publicId,
+      {
+        resource_type: resourceType,
+      }
+    );
+
+    return result;
+
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

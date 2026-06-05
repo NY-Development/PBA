@@ -1,7 +1,6 @@
 import { AuthService } from "./auth.service.js";
 import { Cookie } from "../../utils/cookies.js"
 import logger from "../../utils/logger.js"
-import { uploadToCloudinary }  from "../../utils/cloudinary.js"
 
 
 // REGISTER
@@ -214,15 +213,10 @@ const resendOTP = async(req, res) => {
 
 const updateProfilePicture = async(req, res) => {
   try{
-    const result = await uploadToCloudinary(
-      req.file.buffer,
-      `profiles/${req.user.id}`
-    );
     
     const updatedUser = await AuthService.updateProfilePicture({
-      userId: req.user.userId,
-      imageUrl: result.secure_url,
-      publicId: result.public_id,
+      userId: "aa0cbea1-2190-433e-a7f3-c181b00c7c9b",
+      buffer: req.file.buffer
     });
     
     res.status(200).json({

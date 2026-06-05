@@ -5,6 +5,10 @@ import { JWT } from "../../utils/jwt.js";
 import { AuthRepository } from "./auth.repository.js";
 import { createOTP } from "../../services/otp/otp.service.js"
 import { sendVerificationEmail } from "../../services/email/email.service.js"
+import { 
+  uploadToCloudinary,
+  deleteFromCloudinary
+}  from "../../utils/cloudinary.js"
 
 
 // REGISTER
@@ -379,15 +383,28 @@ const resendOTP = async ({ email, type }) => {
 
 const updateProfilePicture = async({
   userId, 
-  imageUrl,
-  publicId
+  buffer
 }) => {
+  
+  const user = await AuthRepository.findUserById(userId);
+  
+  if(!user) throw new Error("User not found")
 
+  if(user.avatar_public_id){
+    await deleteFromCloudinary(
+      user.avatar_public_id
+    )
+  };
+  
+  const uploaded = await uploadToCloudinary(
+    buffer,
+    `profiles/${userId}`
+  );
 
   const updatedUser = await AuthRepository.updateProfilePicture({
     userId,
-    imageUrl,
-    publicId,
+    imageUrl: uploaded.secure_url,
+    publicId: uploaded.public_id,
   });
 
   return updatedUser;
