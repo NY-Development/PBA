@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS vendors (
   banner_url      TEXT,
   status          VARCHAR(20) DEFAULT 'pending',
   payout_email    VARCHAR(255),
-  created_at      TIMESTAMPTZ DEFAULT NOW()
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -122,4 +122,3 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_product   ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_id   ON refresh_tokens(id);
 CREATE INDEX IF NOT EXISTS idx_refresh_revoked ON refresh_tokens(is_revoked);
-CREATE INDEX IF NOT EXISTS idx_email_otp ON email_verifications(otp);
