@@ -6,10 +6,10 @@ import logger from "../../utils/logger.js"
 // REGISTER
 const register = async (req, res) => {
   try {
-    const message = await AuthService.register(req.body);
+    await AuthService.register(req.body);
 
     return res.status(200).json({
-      message,
+      message: "OTP sent to your email",
     });
 
   } catch (error) {

@@ -36,7 +36,10 @@ CREATE TABLE IF NOT EXISTS vendors (
   status          VARCHAR(20) DEFAULT 'pending',
   payout_email    VARCHAR(255),
   created_at      TIMESTAMPTZ DEFAULT NOW(),
-  updated_at      TIMESTAMPTZ DEFAULT NOW()
+  updated_at      TIMESTAMPTZ DEFAULT NOW(),
+  tin_number      VARCHAR(250) NOT NULL,
+  logo_public_id  TEXT,
+  banner_public_id TEXT
 );
 
 -- categories
