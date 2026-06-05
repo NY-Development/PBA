@@ -36,6 +36,14 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_USER = process.env.SMTP_USER;
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
+// CLOUDINARY
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+
+
+
+
 export const Env = {
   DATABASE_URL,
   REDIS_URL,
@@ -58,4 +66,8 @@ export const Env = {
   SENDER_EMAIL,
   SMTP_USER,
   SMTP_PASS,
+  
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET
 }

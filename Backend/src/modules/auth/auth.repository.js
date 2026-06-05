@@ -99,6 +99,23 @@ const resetPassword = async({email, password}) => {
   return result[0] || null;
 }
 
+const updateProfilePicture = async ({
+  userId,
+  imageUrl,
+  publicId,
+}) => {
+
+  const result = await sql`
+    UPDATE users
+    SET avatar_url = ${imageUrl},
+        avatar_public_id=${publicId},
+        updated_at = NOW()
+    WHERE id = ${userId}
+    RETURNING id, email, avatar_url
+  `;
+
+  return result[0];
+};
 
 export const AuthRepository = {
   findUserByEmail,
@@ -108,5 +125,6 @@ export const AuthRepository = {
   revokeToken,
   updateUser,
   findUserById,
-  resetPassword
+  resetPassword,
+  updateProfilePicture
 }

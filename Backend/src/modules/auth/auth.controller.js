@@ -1,6 +1,8 @@
 import { AuthService } from "./auth.service.js";
 import { Cookie } from "../../utils/cookies.js"
 import logger from "../../utils/logger.js"
+import { uploadToCloudinary }  from "../../utils/cloudinary.js"
+
 
 // REGISTER
 const register = async (req, res) => {
@@ -208,7 +210,32 @@ const resendOTP = async(req, res) => {
       message: err.message
     })
   }
-}
+};
+
+const updateProfilePicture = async(req, res) => {
+  try{
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      `profiles/${req.user.id}`
+    );
+    
+    const updatedUser = await AuthService.updateProfilePicture({
+      userId: req.user.userId,
+      imageUrl: result.secure_url,
+      publicId: result.public_id,
+    });
+    
+    res.status(200).json({
+      message: "Profile picture uploaded successfully",
+      updatedUser
+    })
+  }catch(err){
+    logger.error(`Upload profile picture error: ${err.message}`);
+    res.status(500).json({
+      message: err.message
+    })
+  }
+};
 
 
 export const AuthController = {
@@ -221,5 +248,6 @@ export const AuthController = {
   verifyEmail,
   forgotPassword,
   resetPassword,
-  resendOTP
+  resendOTP,
+  updateProfilePicture
 }

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_name     VARCHAR(255) NOT NULL,
   role          VARCHAR(20) NOT NULL DEFAULT 'customer',  -- customer | vendor | admin
   avatar_url    TEXT,
+  avatar_public_id TEXT, -- for cloudinary
   is_active     BOOLEAN DEFAULT TRUE,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()

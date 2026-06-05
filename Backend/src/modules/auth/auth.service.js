@@ -377,6 +377,22 @@ const resendOTP = async ({ email, type }) => {
   };
 };
 
+const updateProfilePicture = async({
+  userId, 
+  imageUrl,
+  publicId
+}) => {
+
+
+  const updatedUser = await AuthRepository.updateProfilePicture({
+    userId,
+    imageUrl,
+    publicId,
+  });
+
+  return updatedUser;
+};
+
 
 
 export const AuthService = {
@@ -389,5 +405,6 @@ export const AuthService = {
   verifyEmail,
   forgotPassword,
   resetPassword,
-  resendOTP
+  resendOTP,
+  updateProfilePicture
 }
