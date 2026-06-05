@@ -1,5 +1,4 @@
 import { AuthService } from "./auth.service.js";
-import { Env } from "../../configs/env.js"
 import { Cookie } from "../../utils/cookies.js"
 import logger from "../../utils/logger.js"
 
