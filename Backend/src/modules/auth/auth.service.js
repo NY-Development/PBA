@@ -137,13 +137,12 @@ const verifyEmail = async ({ email, otp }) => {
   }
 
   // 3. Create real user
-  const user =
-    await AuthRepository.register({
-      first_name: pendingUser.first_name,
-      last_name: pendingUser.last_name,
-      email: pendingUser.email,
-      password: pendingUser.password,
-    });
+  const user = await AuthRepository.register({
+    first_name: pendingUser.first_name,
+    last_name: pendingUser.last_name,
+    email: pendingUser.email,
+    password: pendingUser.password,
+  });
 
   // 4. Delete pending registration
   await CacheService.del(cacheKey);

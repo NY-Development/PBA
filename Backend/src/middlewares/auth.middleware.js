@@ -3,7 +3,15 @@ import { JWT } from "../utils/jwt.js"
 
 export const protect = async (req, res, next) => {
   try {
-    const accessToken = req.headers.authorization.split(" ")[1];
+    const authHeaders = req.headers.authorization
+    
+    if(!authHeaders) {
+      res.status(404).json({
+        message: "authorization headers not found"
+      });
+    }
+    
+    const accessToken = authHeaders.split(" ")[0];
     
     console.log("The access token is:", accessToken)
 

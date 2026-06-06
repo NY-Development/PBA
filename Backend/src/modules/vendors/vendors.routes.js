@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { protect } from "../../middlewares/auth.middleware.js";
+import { protect, authorize } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { upload } from "../../middlewares/upload.middleware.js";
 import { VendorsController } from "./vendors.controller.js"
@@ -17,5 +17,11 @@ router.post(
   ]),
   VendorsController.register
 );
+
+router.post(
+  "/verify-vendor", 
+  protect,
+  authorize("admin"),
+  VendorsController.verifyVendor)
 
 export default router;

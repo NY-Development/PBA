@@ -26,6 +26,24 @@ const register = async (req, res) => {
   }
 };
 
+const verifyVendor = async(req, res) => {
+  try{
+    const data = await VendorsService.verifyVendor(req.body);
+    
+    res.status(200).json({
+      success: true,
+      data
+    })
+  }catch(err){
+    logger.error(`Error verifying vendor: ${err.message}`);
+    
+    res.status(400).json({
+      message: err.message
+    })
+  }
+};
+
 export const VendorsController = {
   register,
+  verifyVendor
 }

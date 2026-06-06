@@ -32,8 +32,18 @@ const findUserById = async(id) => {
 const findVendorById = async(id) => {
   const result = await sql`
     SELECT * FROM vendors
-    WHERE id=${id}
+    WHERE user_id=${id}
   `
+}
+
+const verifyVendor = async(id) => {
+  const result = await sql`
+    UPDATE vendors
+    SET status='verified'
+    WHERE id=${id}
+    RETURNING *
+  `
+  return result[0];
 }
 
 export const VendorsRepository = {
