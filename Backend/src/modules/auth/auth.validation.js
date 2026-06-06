@@ -9,5 +9,11 @@ export const registerSchema = z.object({
 
 export const loginSchema = z.object({
   email: z.string().email().trim(),
-  password: z.string().min(8, "Password must be al least 8 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const updateUserSchema = z.object({
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+  avatar_url: z.string().optional(),
 });

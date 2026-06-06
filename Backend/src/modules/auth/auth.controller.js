@@ -177,9 +177,9 @@ const forgotPassword = async(req, res) => {
     logger.error("Password reset error:", err.message);
     res.status(500).json({
       message: err.message
-    })
+    });
   }
-}
+};
 
 const resetPassword = async(req, res) => {
   try{

@@ -3,36 +3,32 @@ import { HashUtils } from "../../utils/hash.js";
 import { CacheService } from "../../utils/cache.js";
 import { JWT } from "../../utils/jwt.js";
 import { AuthRepository } from "./auth.repository.js";
-import { createOTP } from "../../services/otp/otp.service.js"
-import { sendEmail } from "../../services/email/email.service.js"
-import { verificationEmailTemplate } from "../../templates/email.template.js";
+import { createOTP } from "../../services/otp/otp.service.js";
+import { sendEmail } from "../../services/email/email.service.js";
+import { baseEmailTemplate } from "../../templates/email.template.js";
 import { 
   uploadToCloudinary,
   deleteFromCloudinary
-}  from "../../utils/cloudinary.js"
+}  from "../../utils/cloudinary.js";
 
 
 // REGISTER
 const register = async (data) => {
   const { first_name, last_name, email, password } = data;
 
-  // 1. Check existing user
   const existing = await AuthRepository.findUserByEmail(email);
 
   if (existing) {
     throw new Error("User with this email already exists");
   }
 
-  // 2. Hash password
   const hashedPassword =
     await HashUtils.hashPassword(password);
-
-  // 3. Generate OTP
+    
   const otp = createOTP();
   
   const hashedOTP = await HashUtils.hashOTP(otp);
 
-  // 4. Cache pending user
   const cacheKey = `otp:register:${email}`;
 
   const userData = {
@@ -49,12 +45,21 @@ const register = async (data) => {
     600
   );
 
-  // 5. Send email
   sendEmail({
-    to: email,
-    subject: `Your email verification code is ${otp}`,
-    template: verificationEmailTemplate(otp)
-  });
+  to: email,
+  subject: `Your email verification code is ${otp}`,
+  template: baseEmailTemplate({
+    headerIcon: "🔐",
+    title: otp,
+
+    subtitle: "Enter this code to complete the registration.",
+    message:
+        "This code will expire in 10 minutes. If you didn't request this pin, we recommend you change your PBA password. Go to Settings & Privacy > Sign in & security > Change password. To further secure your account, you should also enable two-step verification",
+    alertType: "info",
+    supportEmail: "",
+    footerText: "Thank you for using PBA.",
+  }),
+});
 
   return {
     message: "OTP sent successfully to your email, please check your email",
@@ -111,11 +116,12 @@ const login = async (data) => {
 
 // EMAIL VERIFICATION
 const verifyEmail = async ({ email, otp }) => {
-  // 1. Get pending user
+  
+  if(!email || !otp) throw new Error("Missing required fields");
+
   const cacheKey = `otp:register:${email}`;
 
-  const pendingUser =
-    await CacheService.get(cacheKey);
+  const pendingUser = await CacheService.get(cacheKey);
 
   if (!pendingUser) {
     throw new Error(
@@ -123,20 +129,17 @@ const verifyEmail = async ({ email, otp }) => {
     );
   }
   
-  if(!otp) throw new Error("OTP not provided")
+  if(!otp) throw new Error("OTP not provided");
 
-  // 2. Compare OTP
-  const isOtpValid =
-    await HashUtils.compareOTP(
-      otp,
-      pendingUser.otp
-    );
+  const isOtpValid = await HashUtils.compareOTP(
+    otp,
+    pendingUser.otp
+  );
 
   if (!isOtpValid) {
     throw new Error("Invalid OTP");
   }
 
-  // 3. Create real user
   const user = await AuthRepository.register({
     first_name: pendingUser.first_name,
     last_name: pendingUser.last_name,
@@ -144,10 +147,8 @@ const verifyEmail = async ({ email, otp }) => {
     password: pendingUser.password,
   });
 
-  // 4. Delete pending registration
   await CacheService.del(cacheKey);
 
-  // 5. Create session
   const session_id = randomUUID();
 
   const payload = {
@@ -156,18 +157,12 @@ const verifyEmail = async ({ email, otp }) => {
     session_id,
   };
 
-  // 6. Generate tokens
-  const accessToken =
-    await JWT.generateAccessToken(payload);
+  const accessToken = await JWT.generateAccessToken(payload);
 
-  const refreshToken =
-    await JWT.generateRefreshToken(payload);
+  const refreshToken = await JWT.generateRefreshToken(payload);
 
-  // 7. Hash refresh token
-  const hashedToken =
-    await HashUtils.hashToken(refreshToken);
+  const hashedToken = await HashUtils.hashToken(refreshToken);
 
-  // 8. Save refresh session
   await AuthRepository.createToken({
     token_id: session_id,
     user_id: user.id,
@@ -187,18 +182,19 @@ const verifyEmail = async ({ email, otp }) => {
   };
 };
 
-
+// LOGOUT
 const logout = async(payload) => {
   const { session_id, userId } = payload;
   
   if(!userId) throw new Error("User not found");
   
-  const session = 
-    await AuthRepository.findTokenBySession({token_id: session_id})
+  if(!session_id) throw new Error("session_id not found");
+  
+  const session = await AuthRepository.findTokenBySession({token_id: session_id});
   
   if (!session) throw new Error("Session not found");
   
-  if(session.revoked) throw new Error("This session has already been revoked")
+  if(session.revoked) throw new Error("This session has already been revoked");
   
   const result = await AuthRepository.revokeToken({
     user_id: userId,
@@ -210,7 +206,7 @@ const logout = async(payload) => {
 
 // GET ME
 const getMe = async (userId) => {
-  if(!userId) throw new Error("User id not found")
+  if(!userId) throw new Error("User id not found");
   
   const user = await AuthRepository.findUserById(userId);
   
@@ -220,33 +216,33 @@ const getMe = async (userId) => {
   return user;
 };
 
+// REFRESH
 const refresh = async(oldRefreshToken, payloadData) => {
   const { userId, session_id } = payloadData;
   
-  if(!userId) throw new Error("User id not found")
+  if(!userId) throw new Error("User id not found");
+  
+  if(!session_id) throw new Error("session_id not found");
   
   const user = await AuthRepository.findUserById(userId);
   
-  if(!user) throw new Error("User not found")
+  if(!user) throw new Error("User not found");
   
-  const session = 
-    await AuthRepository.findTokenBySession({token_id: session_id})
+  const session = await AuthRepository.findTokenBySession({token_id: session_id});
   
   if (!session) throw new Error("Session not found");
 
-  if (session.revoked)
-    throw new Error("This session has already been revoked");
+  if (session.revoked) throw new Error("This session has already been revoked");
   
-  if (!session.token)
-    throw new Error("Refresh token not found");
+  if (!session.token) throw new Error("Refresh token not found");
   
-  if(!session.token) throw new Error("Refresh Token not found")
+  if(!session.token) throw new Error("Refresh Token not found");
   
   const isTokenValid = await HashUtils.compareToken(
     oldRefreshToken, session.token
-  )
+  );
   
-  if(!isTokenValid) throw new Error("Token expired or invalid")
+  if(!isTokenValid) throw new Error("Token expired or invalid");
   
   const payload = {
     userId: user.id,
@@ -254,11 +250,12 @@ const refresh = async(oldRefreshToken, payloadData) => {
     session_id,
   };
   
-  const newAccessToken = await JWT.generateAccessToken(payload)
+  const newAccessToken = await JWT.generateAccessToken(payload);
   
   return { newAccessToken };
 };
 
+// UPDATE
 const updateUser = async(data, userId) => {
   const {
     first_name,
@@ -269,24 +266,23 @@ const updateUser = async(data, userId) => {
   
   const user = await AuthRepository.findUserById(userId);
   
-  if(!user) throw new Error("User not found")
+  if(!user) throw new Error("User not found");
   
   const result = await AuthRepository.updateUser(data, userId)
   
   return result;
 };
 
+// FORGOT PASSWORD
 const forgotPassword = async({email}) => {
+  
+  if(!email) throw new Error("Email is required")
   
   const existing = await AuthRepository.findUserByEmail(email);
 
-  if (!existing) {
-    throw new Error("User with this email doesn't exist");
-  }
+  if(!existing) throw new Error("User with this email doesn't exist");
   
-  if (!existing.is_active) {
-    throw new Error("Your account temporarily locked");
-  }
+  if (!existing.is_active) throw new Error("Your account temporarily locked");
   
   const cacheKey = `otp:reset:${email}`
   
@@ -307,7 +303,17 @@ const forgotPassword = async({email}) => {
   sendEmail({
     to: email,
     subject: `Your password reset code is ${otp}`,
-    template: verificationEmailTemplate(otp),
+    template: baseEmailTemplate({
+      headerIcon: "🔐",
+      title: otp,
+  
+      subtitle: "Enter this code to complete the reset.",
+      message:
+          "This code will expire in 10 minutes. If you didn't request this pin, we recommend you change your PBA password. Go to Settings & Privacy > Sign in & security > Change password. To further secure your account, you should also enable two-step verification",
+      alertType: "info",
+      supportEmail: "",
+      footerText: "Thank you for using PBA.",
+    }),
   });
 
   return {
@@ -316,6 +322,7 @@ const forgotPassword = async({email}) => {
   
 }
 
+// RESET PASSWORD
 const resetPassword = async({email, otp, password}) => {
   const cacheKey = `otp:reset:${email}`;
   
@@ -354,6 +361,7 @@ const resetPassword = async({email, otp, password}) => {
   
 }
 
+// RESEND OTP
 const resendOTP = async ({ email, type }) => {
   if(!type) throw new Error("OTP type not provided")
   
@@ -376,11 +384,27 @@ const resendOTP = async ({ email, type }) => {
   const subject = type==="reset" 
     ? `Your password reset code is ${otp}`
     : `Your email verification code is ${otp}`
+  
+  const title = type==="reset"
+    ? "reset"
+    : "registeration"
+  
 
-  await sendEmail({
-    to: "email",
-    template: verificationEmailTemplate(otp),
+  sendEmail({
+    to: email,
     subject,
+  
+    template: baseEmailTemplate({
+      headerIcon: "🔐",
+      title: otp,
+      subtitle: `Enter this code to complete the ${title}`,
+      greeting: "Hello Sana,",
+      message:
+        "This code will expire in 10 minutes. If you didn't request this pin, we recommend you change your PBA password. Go to Settings & Privacy > Sign in & security > Change password. To further secure your account, you should also enable two-step verification",
+  
+      alertType: "info",
+      supportEmail: "",
+    }),
   });
 
   return {
@@ -388,6 +412,7 @@ const resendOTP = async ({ email, type }) => {
   };
 };
 
+// UPDATE PROFILE PICTURE
 const updateProfilePicture = async({
   userId, 
   buffer

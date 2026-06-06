@@ -3,10 +3,7 @@ import { Env } from "../../configs/env.js";
 import { 
   sendEmail
 } from "../../services/email/email.service.js";
-import { 
-  verificationEmailTemplate,
-  paymentSuccessTemplate,
-} from "../../templates/email.template.js";
+import { baseEmailTemplate } from "../../templates/email.template.js";
 
 
 const verifyCBE = async({
@@ -24,15 +21,46 @@ const verifyCBE = async({
       }
    );
   
-  await sendEmail({
+  sendEmail({
     to: "matusalasana@gmail.com",
-    subject: "Payment verified",
-    template: paymentSuccessTemplate({
-      customerName: "Sana Matusala",
-      amount: "3000",
-      orderId: "cbe-1346788"
-    })
-  })
+    subject: "Payment verified successfully",
+  
+    template: baseEmailTemplate({
+      headerIcon: "✅",
+  
+      title: "You have successfully ordered the:",
+  
+      subtitle:
+        "You can now track delivery.",
+  
+      greeting: "Hello Sana,",
+  
+      message:
+        "Congratulations! Your application has been approved successfully.",
+  
+      highlightContent:
+        "Your vendor account is now active.",
+  
+      alertType: "success",
+  
+      listItems: [
+        "Add products",
+        "Manage inventory",
+        "Track orders",
+        "Receive payouts",
+      ],
+  
+      buttonText: "Open Dashboard",
+  
+      buttonUrl:
+        "https://yourapp.com/vendor/dashboard",
+  
+      supportEmail: "support@yourapp.com",
+  
+      footerText:
+        "Thank you for using PBA.",
+    }),
+  });
   
   return response.data;
 }

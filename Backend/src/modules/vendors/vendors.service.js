@@ -85,18 +85,29 @@ const verifyVendor = async({
   
   sendEmail({
     to: notifyEmail,
-    subject: "Application Approved",
+    subject: "Vendor Application Approved",
     template: baseEmailTemplate({
-      logo: "",
+      appName: "PBA",
       headerIcon: "✅",
-      title: "Your application to become vendor has been approved",
-      subtitle: "You can now sell your products",
-      message: "Name sana matusala hdh djhjdj djdbdjd dtdbd adhdjdjjdksjdjdiejejdjr djd djdbd djd djd dbd dhd dbd dbd d dbd dnd dbd dbddjd dbdjd dbedjd d djdjdd d djdjdjd sjdbd dj dj ejrj eufuf hdjjd jrud",
-      highlightContent: "your application is accepted",
-      buttonText: "Now you're memeber of our clients",
-      buttonUrl: "https://www.linkedin.com/in/sana-matusala-b111a7366",
-    })
-  })
+      title: "Vendor Application Approved",
+  
+      subtitle: "You can now start selling products.",
+      greeting: `${user.first_name},`,
+      message: "Congratulations! Your application has been approved successfully. Yo can now:",
+      highlightContent: "Your vendor account is now active.",
+      alertType: "success",
+      listItems: [
+        "Add products",
+        "Manage inventory",
+        "Track orders",
+        "Receive payouts",
+      ],
+      buttonText: "Open Dashboard",
+      buttonUrl: "",
+      supportEmail: "",
+      footerText: "Thank you for joining us.",
+    }),
+  });
 };
 
 export const VendorsService = {
