@@ -33,8 +33,9 @@ router.post(
 
 router.patch(
   "/update", 
-  protect, 
-  validate(updateUserSchema), 
+  protect,
+  upload.single("avatar"),
+  validate(updateUserSchema),
   AuthController.update
 );
 
@@ -70,12 +71,5 @@ router.post(
   AuthController.resendOTP
 );
 
-router.post(
-  "/profile-picture", 
-  protect,
-  authorize("customer", "vendor"),
-  upload.single("avatar"), 
-  AuthController.updateProfilePicture
-);
 
 export default router;

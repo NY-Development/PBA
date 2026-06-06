@@ -1,6 +1,6 @@
 import { AuthService } from "./auth.service.js";
-import { Cookie } from "../../utils/cookies.js"
-import logger from "../../utils/logger.js"
+import { Cookie } from "../../utils/cookies.js";
+import logger from "../../utils/logger.js";
 
 
 // REGISTER
@@ -35,7 +35,6 @@ const verifyEmail = async (req, res) => {
       req.body
     );
 
-    // set refresh cookie
     await Cookie.setRefreshToken(
       res,
       refreshToken
@@ -89,9 +88,9 @@ const login = async (req, res) => {
 // LOGOUT
 const logout = async(req, res) => {
   try{
-    await AuthService.logout(req.user)
+    await AuthService.logout(req.user);
     
-    await Cookie.clearRefreshToken(res)
+    await Cookie.clearRefreshToken(res);
   
     return res.status(200).json({
       message: "Logged out successfully"
@@ -100,10 +99,9 @@ const logout = async(req, res) => {
     logger.error("Logout error:", err.message);
     return res.status(500).json({
       message: err.message || "server error"
-    })
+    });
   }
 };
-
 
 // GET ME
 const getMe = async (req, res) => {
@@ -124,9 +122,9 @@ const getMe = async (req, res) => {
   }
 };
 
+// REFRESH 
 const refresh = async (req, res) => {
   try {
-    console.log(req.user)
     const { newAccessToken } = 
       await AuthService.refresh(req.cookies.refreshToken, req.user);
     
@@ -144,12 +142,14 @@ const refresh = async (req, res) => {
   }
 };
 
+// UPDATE 
 const update = async (req, res) => {
   try {
-    const updatedUser = await AuthService.updateUser(
-      req.body, 
-      req.user.userId
-    );
+    const updatedUser = await AuthService.updateUser({
+      bodyData: req.body,
+      userId: req.user.userId,
+      avatar_buffer: req.file?.buffer,
+    });
 
     return res.status(200).json({
       message: "User updated successfully",
@@ -165,13 +165,14 @@ const update = async (req, res) => {
   }
 };
 
+// FORGOT PASSWORD 
 const forgotPassword = async(req, res) => {
   try{
-    await AuthService.forgotPassword(req.body)
+    await AuthService.forgotPassword(req.body);
     
     res.status(200).json({
       message: "Password reset code sent to your email"
-    })
+    });
     
   }catch(err){
     logger.error("Password reset error:", err.message);
@@ -181,55 +182,39 @@ const forgotPassword = async(req, res) => {
   }
 };
 
+// RESET PASSWORD 
 const resetPassword = async(req, res) => {
   try{
     await AuthService.resetPassword(req.body);
     
     res.status(200).json({
       message: "Password reset successfully"
-    })
+    });
   }catch(err){
     logger.error("Password reset failed:", err.message);
     res.status(500).json({
       message: err.message
-    })
+    });
   }
-}
+};
 
+// RESEND OTP
 const resendOTP = async(req, res) => {
   try{
     await AuthService.resendOTP(req.body);
     
     res.status(200).json({
       message: "OTP sent to your email"
-    })
+    });
   }catch(err){
-    logger.error("Resending OTP error:", err.message)
+    logger.error("Resending OTP error:", err.message);
     res.status(500).json({
       message: err.message
-    })
+    });
   }
 };
 
-const updateProfilePicture = async(req, res) => {
-  try{
-    
-    const updatedUser = await AuthService.updateProfilePicture({
-      userId: "aa0cbea1-2190-433e-a7f3-c181b00c7c9b",
-      buffer: req.file.buffer
-    });
-    
-    res.status(200).json({
-      message: "Profile picture uploaded successfully",
-      updatedUser
-    })
-  }catch(err){
-    logger.error(`Upload profile picture error: ${err.message}`);
-    res.status(500).json({
-      message: err.message
-    })
-  }
-};
+
 
 
 export const AuthController = {

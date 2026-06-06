@@ -6,7 +6,6 @@ export const validate = (schema) => (
     
   const result = schema.safeParse(req.body);
 
-  // return error if validation fails
   if (!result.success) {
     logger.error(`${result.error}`)
     return res.status(400).json({
@@ -15,7 +14,6 @@ export const validate = (schema) => (
     });
   }
 
-  // overwrite request body with clean data
   req.body = result.data;
 
   next();

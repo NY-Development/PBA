@@ -256,20 +256,47 @@ const refresh = async(oldRefreshToken, payloadData) => {
 };
 
 // UPDATE
-const updateUser = async(data, userId) => {
-  const {
+const updateUser = async ({
+  userId,
+  bodyData,
+  avatar_buffer,
+}) => {
+
+  const { first_name, last_name } = bodyData;
+
+  if (!userId) {
+    throw new Error("User id not found");
+  }
+
+  const user = await AuthRepository.findUserById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  let avatar_url = user.avatar_url;
+  let avatar_public_id = user.avatar_public_id;
+
+  if (avatar_buffer) {
+    const uploaded = await uploadToCloudinary(
+      avatar_buffer,
+      `profiles/${userId}`
+    );
+    if (user.avatar_public_id) {
+      await deleteFromCloudinary(user.avatar_public_id);
+    }
+    avatar_url = uploaded.secure_url;
+    avatar_public_id = uploaded.public_id;
+  }
+
+  const result = await AuthRepository.updateUser({
+    id: userId,
     first_name,
     last_name,
-    avatar_url } = data;
-  
-  if(!userId) throw new Error("User id not found")
-  
-  const user = await AuthRepository.findUserById(userId);
-  
-  if(!user) throw new Error("User not found");
-  
-  const result = await AuthRepository.updateUser(data, userId)
-  
+    avatar_url,
+    avatar_public_id,
+  });
+
   return result;
 };
 
@@ -412,36 +439,6 @@ const resendOTP = async ({ email, type }) => {
   };
 };
 
-// UPDATE PROFILE PICTURE
-const updateProfilePicture = async({
-  userId, 
-  buffer
-}) => {
-  
-  const user = await AuthRepository.findUserById(userId);
-  
-  if(!user) throw new Error("User not found")
-
-  if(user.avatar_public_id){
-    await deleteFromCloudinary(
-      user.avatar_public_id
-    )
-  };
-  
-  const uploaded = await uploadToCloudinary(
-    buffer,
-    `profiles/${userId}`
-  );
-
-  const updatedUser = await AuthRepository.updateProfilePicture({
-    userId,
-    imageUrl: uploaded.secure_url,
-    publicId: uploaded.public_id,
-  });
-
-  return updatedUser;
-};
-
 
 
 export const AuthService = {
@@ -455,5 +452,4 @@ export const AuthService = {
   forgotPassword,
   resetPassword,
   resendOTP,
-  updateProfilePicture
 }

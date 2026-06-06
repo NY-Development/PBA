@@ -69,20 +69,22 @@ const findUserById = async (id) => {
   return result[0] || null;
 };
 
-const updateUser = async(data, user_id) => {
-  const {
-    first_name,
-    last_name,
-    avatar_url } = data;
+const updateUser = async({
+  id,
+  first_name,
+  last_name,
+  avatar_url,
+  avatar_public_id
+}) => {
   
   const result = await sql`
-    UPDATE 
-      users
+    UPDATE users
     SET 
       first_name = COALESCE(${first_name}, first_name),
       last_name = COALESCE(${last_name}, last_name),
-      avatar_url = COALESCE(${avatar_url}, avatar_url)
-    WHERE id=${user_id}
+      avatar_url = COALESCE(${avatar_url}, avatar_url),
+      avatar_public_id = COALESCE(${avatar_public_id}, avatar_public_id)
+    WHERE id=${id}
     RETURNING *
   `
   
@@ -99,23 +101,6 @@ const resetPassword = async({email, password}) => {
   return result[0] || null;
 }
 
-const updateProfilePicture = async ({
-  userId,
-  imageUrl,
-  publicId,
-}) => {
-
-  const result = await sql`
-    UPDATE users
-    SET avatar_url = ${imageUrl},
-        avatar_public_id=${publicId},
-        updated_at = NOW()
-    WHERE id = ${userId}
-    RETURNING id, email, avatar_url
-  `;
-
-  return result[0];
-};
 
 export const AuthRepository = {
   findUserByEmail,
@@ -126,5 +111,4 @@ export const AuthRepository = {
   updateUser,
   findUserById,
   resetPassword,
-  updateProfilePicture
 }
