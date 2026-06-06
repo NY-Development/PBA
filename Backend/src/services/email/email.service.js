@@ -1,15 +1,18 @@
 import { transporter } from "../../configs/email.js";
-import { verificationEmailTemplate } from "../../templates/email.template.js";
 import { Env } from "../../configs/env.js";
 
-export const sendVerificationEmail = async ({ to, otp }) => {
+export const sendEmail = async ({ 
+  to,
+  subject,
+  template
+}) => {
   try {
     
     const info = await transporter.sendMail({
       from: `"Peanut Store" <${Env.SENDER_EMAIL}>`,
       to,
-      subject: `Your verification code is ${otp}`,
-      html: verificationEmailTemplate(otp),
+      subject,
+      html: template,
     });
     
     console.log(`✨ Verification code sent to ${to}. Message ID: ${info.messageId}`);

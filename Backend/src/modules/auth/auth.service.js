@@ -4,7 +4,8 @@ import { CacheService } from "../../utils/cache.js";
 import { JWT } from "../../utils/jwt.js";
 import { AuthRepository } from "./auth.repository.js";
 import { createOTP } from "../../services/otp/otp.service.js"
-import { sendVerificationEmail } from "../../services/email/email.service.js"
+import { sendEmail } from "../../services/email/email.service.js"
+import { verificationEmailTemplate } from "../../templates/email.template.js";
 import { 
   uploadToCloudinary,
   deleteFromCloudinary
@@ -49,9 +50,10 @@ const register = async (data) => {
   );
 
   // 5. Send email
-  sendVerificationEmail({
+  sendEmail({
     to: email,
-    otp,
+    subject: `Your email verification code is ${otp}`,
+    template: verificationEmailTemplate(otp)
   });
 
   return {
@@ -303,9 +305,10 @@ const forgotPassword = async({email}) => {
     600
   );
   
-  sendVerificationEmail({
+  sendEmail({
     to: email,
-    otp,
+    subject: `Your password reset code is ${otp}`,
+    template: verificationEmailTemplate(otp),
   });
 
   return {
@@ -370,10 +373,15 @@ const resendOTP = async ({ email, type }) => {
   }
 
   await CacheService.set(cacheKey, userData, 600);
+  
+  const subject = type==="reset" 
+    ? `Your password reset code is ${otp}`
+    : `Your email verification code is ${otp}`
 
-  await sendVerificationEmail({
-    to: email,
-    otp,
+  await sendEmail({
+    to: "email",
+    template: verificationEmailTemplate(otp),
+    subject,
   });
 
   return {

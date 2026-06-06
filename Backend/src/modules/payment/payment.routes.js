@@ -9,5 +9,6 @@ import { PaymentController } from "./payment.controller.js"
 const router = Router();
 
 router.post("/verify-cbe", protect, PaymentController.verifyCBE);
+router.post("/verify-telebirr", protect, PaymentController.verifyTelebirr);
 
 export default router;

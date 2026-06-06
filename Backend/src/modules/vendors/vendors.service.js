@@ -4,7 +4,7 @@ import { CacheService } from "../../utils/cache.js";
 import { JWT } from "../../utils/jwt.js";
 import { VendorsRepository } from "./vendors.repository.js";
 import { createOTP } from "../../services/otp/otp.service.js"
-import { sendVerificationEmail } from "../../services/email/email.service.js"
+import { sendEmail } from "../../services/email/email.service.js"
 import { 
   uploadToCloudinary,
   deleteFromCloudinary
@@ -49,9 +49,15 @@ const register = async ({
     banner_public_id: bannerResult.public_id,
   })
   
-  sendVerificationEmail({
+  sendEmail({
     to: "matusalasana@gmail.com",
-    otp: "Vendor Application"
+    subject: "New Vendor Application",
+    template: baseEmailTemplate({
+      headerIcon: "📩",
+      title: "New Vendor Application",
+      subtitle: "waiting for your approval",
+      message: `Store named ${store_name} applied to become vendor`,
+    })
   })
 
   return vendor;

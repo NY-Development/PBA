@@ -9,26 +9,44 @@ const verifyCBE = async(req, res) => {
     })
     
     res.status(200).json({
-      message: "Payment is pending, you'll receive notification once confirmed",
+      message: "Payment verified successfully",
       data
     })
   }catch(err){
-  console.log(err.response?.data);
+    logger.error(
+      `Error verifying payment: ${
+        err.response?.data?.message || err.message
+      }`
+    );
+  
+    res.status(err.response?.status).json(err.response?.data);
+  }
+};
 
-  logger.error(
-    `Error verifying CBE payment: ${
-      err.response?.data?.message || err.message
-    }`
-  );
-    
-    res.status(500).json({
-      message: err.message
+const verifyTelebirr = async(req, res) => {
+  try{
+    const data = await PaymentService.verifyTelebirr({
+      userId: req.user.userId,
+      bodyData: req.body
     })
+    
+    res.status(200).json({
+      message: "Payment verified successfully",
+      data
+    })
+  }catch(err){
+    logger.error(
+      `Error verifying payment: ${
+        err.response?.data?.message || err.message
+      }`
+    );
+  
+    res.status(err.response?.status).json(err.response?.data);
   }
 }
 
 
-
 export const PaymentController = {
   verifyCBE,
+  verifyTelebirr
 }
