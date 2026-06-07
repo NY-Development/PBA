@@ -1,4 +1,3 @@
-// src/api/client.ts
 import axios, { 
   AxiosInstance, 
   InternalAxiosRequestConfig, 
@@ -7,11 +6,8 @@ import axios, {
 } from 'axios';
 import { useAuthStore } from '../stores/useAuthStore';
 
-// Swapped to EXPO_PUBLIC environment naming conventions
-// Fallback sequence: EXPO_PUBLIC_API_URL -> Android Emulator (10.0.2.2) -> Localhost
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:9000'; // Defaulting to 10.0.2.2 for emulator compatibility
-
-
+// Sequence: Explicit environment variable -> Safe machine localhost fallback loop
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9000';
 const API_VERSION = 'api/v1';
 
 /**
@@ -49,7 +45,7 @@ const api: AxiosInstance = axios.create({
 // ==========================================
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Correctly extracting your global token state directly from Zustand
+    // Extracting global token state directly from Zustand
     const token = useAuthStore.getState().accessToken;
     
     if (token && config.headers) {
@@ -79,12 +75,10 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const status = error.response?.status;
-    const errorMessage = (error.response?.data as any)?.message || 'Something went wrong';
 
     // 401 Unauthorized - The Core Token Refresh Queue Mechanism
     if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // Queue up all other subsequent requests while the first one refreshes the token
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token: string) => {
@@ -104,23 +98,19 @@ api.interceptors.response.use(
       const { refreshToken, logout, setTokens } = useAuthStore.getState();
 
       return new Promise((resolve, reject) => {
-        // Use standard root axios here to completely bypass the api client instance interceptor loop
         axios
           .post(`${BASE_URL}/${API_VERSION}/auth/refresh`, { refreshToken })
           .then(({ data }) => {
-            // Update global state memory with the fresh token pairs
             setTokens(data.accessToken, data.refreshToken);
 
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
             }
             
-            // Re-fire all queued requests with the shiny new token
             processQueue(null, data.accessToken);
             resolve(api(originalRequest));
           })
           .catch((refreshError) => {
-            // If the refresh token itself is expired or blacklisted, drop auth memory & force log out
             processQueue(refreshError, null);
             logout();
             reject(refreshError);
@@ -131,21 +121,26 @@ api.interceptors.response.use(
       });
     }
 
-    // Central Switchboard for other standard HTTP Errors
+    // Deep-Diagnostic Switchboard for Network Errors
     if (__DEV__) {
-      switch (status) {
-        case 403:
-          console.error('Forbidden: You do not have permissions.');
-          break;
-        case 404:
-          console.error('Resource not found:', error.config?.url);
-          break;
-        case 500:
-          console.error('Internal Server Error. Please try again later.');
-          break;
-        default:
-          console.error(`[API Error] ${status || 'Network'}: ${errorMessage}`);
+      console.log('\n============= 🚨 [API NETWORK ERROR DIAGNOSTIC] =============');
+      console.log(`📡 Requested URL:   ${error.config?.method?.toUpperCase()} -> ${error.config?.baseURL}/${error.config?.url}`);
+      console.log(`✉️  Sent Headers:    `, JSON.stringify(error.config?.headers, null, 2));
+      
+      if (error.response) {
+        // Server replied with a formal error status code (4xx, 5xx)
+        console.log(`❌ HTTP Status:     ${error.response.status}`);
+        console.log(`📦 Response Body:   `, JSON.stringify(error.response.data, null, 2));
+      } else if (error.request) {
+        // Local hardware could not bridge a connection path to your backend port
+        console.log(`⏳ Request Status:  No response received from the host server.`);
+        console.log(`💡 Probable Cause: Your phone cannot route data to your computer's local network IP.`);
+        console.log(`🛠️  Target Host:    ${error.config?.baseURL}`);
+      } else {
+        // Structural setup failure
+        console.log(`💥 Context Message: ${error.message}`);
       }
+      console.log('==============================================================\n');
     }
 
     return Promise.reject(error);
