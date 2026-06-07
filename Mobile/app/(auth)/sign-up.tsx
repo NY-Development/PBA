@@ -1,4 +1,3 @@
-// app/(auth)/sign-up.tsx
 import React from 'react';
 import { SignUpRoleSelector } from '@/components/features/auth/SignUpRoleSelector';
 

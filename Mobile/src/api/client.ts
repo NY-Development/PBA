@@ -8,7 +8,9 @@ import axios, {
 import { useAuthStore } from '../stores/useAuthStore';
 
 // Swapped to EXPO_PUBLIC environment naming conventions
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.66.92.210:9000';
+// Fallback sequence: EXPO_PUBLIC_API_URL -> Android Emulator (10.0.2.2) -> Localhost
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:9000'; // Defaulting to 10.0.2.2 for emulator compatibility
+
 
 const API_VERSION = 'api/v1';
 

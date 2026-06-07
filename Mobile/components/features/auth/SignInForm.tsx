@@ -1,19 +1,19 @@
-// components/features/auth/SignInForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Pressable, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Languages, Mail, Eye, EyeOff } from 'lucide-react-native';
+import { Languages, Mail, Eye, EyeOff, Fingerprint } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
-// 🌟 Enforcing your reusable atomic components
+// 🌟 Reusable atomic components
 import { CustomInput } from '@/components/common/CustomInput';
 import { CustomButton } from '@/components/common/CustomButton';
 
 // 🌟 Auth Integrations
 import { useLoginMutation } from '@/src/hooks/auth/useAuthMutation';
 import { signInSchema } from '@/src/types/validation/auth.schema';
+import { biometricService } from '@/src/utils/biometrics';
 
 export function SignInForm() {
   const router = useRouter();
@@ -21,10 +21,23 @@ export function SignInForm() {
   const [password, setPassword] = useState('');
   const [secureText, setSecureText] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hasBiometricSetup, setHasBiometricSetup] = useState(false);
+
+  // Check if biometrics are actively setup on device mount
+  useEffect(() => {
+    async function checkExistingBiometrics() {
+      const isEnabled = await biometricService.isBiometricsEnabled();
+      if (isEnabled) {
+        setHasBiometricSetup(true);
+        // Intercept and auto-redirect straight to the biometric gate screen
+        router.replace('/(auth)/sign-in-biometric');
+      }
+    }
+    checkExistingBiometrics();
+  }, []);
 
   const { mutate: login, isPending } = useLoginMutation({
     onSuccess: () => {
-      // Assuming /(auth)/home is the post-login destination in this file
       router.replace('/(auth)/home');
     },
     onError: (error) => {
@@ -51,13 +64,24 @@ export function SignInForm() {
   return (
     <SafeAreaView edges={['top', 'bottom', 'left', 'right']} className="flex-1 bg-background">
       {/* Header Container */}
-      <View className="flex-row items-center justify-start px-6 pt-2">
+      <View className="flex-row items-center justify-between px-6 pt-2">
         <Pressable 
           onPress={() => router.push('/modals/language-select')}
           className="h-10 w-10 rounded-full bg-card border border-border items-center justify-center active:opacity-70"
         >
           <Languages size={20} className="text-foreground" />
         </Pressable>
+
+        {/* Floating Quick Action Biometric Entry point if already configured */}
+        {hasBiometricSetup && (
+          <Pressable 
+            onPress={() => router.push('/(auth)/sign-in-biometric')}
+            className="h-10 px-3 flex-row gap-1.5 rounded-full bg-[#120d0a] border border-[#ff9514]/20 items-center justify-center active:opacity-80"
+          >
+            <Fingerprint size={16} color="#ff9514" />
+            <Text className="text-xs font-semibold text-[#ff9514]">Use Biometrics</Text>
+          </Pressable>
+        )}
       </View>
 
       {/* Main Content Node */}
@@ -163,7 +187,9 @@ export function SignInForm() {
 
         {/* Third-Party Authentication Grid */}
         <View className="flex-row gap-4 w-full justify-center mb-6">
-          <Pressable className="flex-1 max-w-[140px] h-12 rounded-xl border border-border bg-card items-center justify-center active:bg-muted/50">
+          <Pressable 
+          onPress={() => router.replace('/(auth)/sign-in-biometric')}
+          className="flex-1 max-w-[140px] h-12 rounded-xl border border-border bg-card items-center justify-center active:bg-muted/50">
             <Image 
               source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC7AjzI3XZtG2cnPpjzLWLYFBaCyDmtY9OF3RSe29cwmMbG4G-n0vMXVh6SrZUhSV_2ASnUt2FaMYL89nKZ1UOgfEXZ3YNllSQhBeNVszdqVBTgn5KrvWb5WbPj0BKRGnMkTy2FrSJqvGe2YzP3czkqpjbhgYV4nTU0ep3NLklHgzZr_SpHwMx9_bU6c9_8i6Y1PCnJdOk_VelCMhEWh1QQPzfCBFs1QPCRz6KSOgoy1qVULaKMUQEdY27RceeZXFWvmagYQcwuZwq2' }}
               className="w-5 h-5 object-contain"

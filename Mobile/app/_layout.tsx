@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import '@/global.css';
 
 import { NAV_THEME } from '@/lib/theme';
@@ -16,6 +15,9 @@ import * as SecureStore from 'expo-secure-store';
 
 import { queryClient } from '@/src/config/queryClient';
 import { useAuthStore } from '@/src/stores/useAuthStore';
+
+// 🌟 Import your reusable Push Notification Context Manager 
+import PushNotificationManager from '@/components/providers/PushNotificationManager';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -59,9 +61,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     (async () => {
-      // Rehydrate logic check could go here if needed.
-      // But since Zustand uses Async/Secure Store, it automatically hydrates.
-      // We just ensure we render after initial checks.
+      // Rehydrate logic check runs automatically via Zustand.
+      // We explicitly check secure chip storage to clear initial loader indicators.
       const hasToken = await SecureStore.getItemAsync('token');
       setAuthBootstrapped(true);
     })();
@@ -70,50 +71,53 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
-        <View key={colorScheme} className="flex-1 bg-background relative">
-          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-          
-          {/* Structural Application Router Core Grid */}
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: 'transparent' },
-              animation: 'fade_from_bottom',
-            }}
-          >
-            <Stack.Screen name="splash" options={{ animation: 'fade' }} />
-            <Stack.Screen name="(auth)" options={{ gestureEnabled: false }} />
-            <Stack.Screen name="(main)" options={{ gestureEnabled: false }} />
-            <Stack.Screen name="(seller)" options={{ gestureEnabled: true }} />
-            <Stack.Screen 
-              name="modals" 
-              options={{ 
-                presentation: 'modal',
-                animation: 'slide_from_bottom' 
-              }} 
-            />
-          </Stack>
-
-          {/* Primitives Portal layer for dropdowns, tooltips, etc */}
-          <PortalHost />
-
-          {/* 🌟 GLOBAL INTERACTIVE THEME CONTROLLER OVERLAY */}
-          <View 
-            pointerEvents="box-none" 
-            className="absolute top-12 right-6 z-[999] flex-row justify-end items-center"
-          >
-            <Pressable 
-              onPress={toggleColorScheme}
-              className="h-11 w-11 rounded-full bg-card/90 border border-border items-center justify-center shadow-md active:scale-95 transition-transform backdrop-blur-md"
+        {/* 🌟 Wrapped here so application deep-links fire inside a safe routing context */}
+        {/* <PushNotificationManager> */}
+          <View key={colorScheme} className="flex-1 bg-background relative">
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+            
+            {/* Structural Application Router Core Grid */}
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: 'transparent' },
+                animation: 'fade_from_bottom',
+              }}
             >
-              {colorScheme === 'dark' ? (
-                <Sun size={20} color="#ec7f13" strokeWidth={2.5} />
-              ) : (
-                <Moon size={20} color="#4B3621" strokeWidth={2.5} />
-              )}
-            </Pressable>
+              <Stack.Screen name="splash" options={{ animation: 'fade' }} />
+              <Stack.Screen name="(auth)" options={{ gestureEnabled: false }} />
+              <Stack.Screen name="(main)" options={{ gestureEnabled: false }} />
+              <Stack.Screen name="(seller)" options={{ gestureEnabled: true }} />
+              <Stack.Screen 
+                name="modals" 
+                options={{ 
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom' 
+                }} 
+              />
+            </Stack>
+
+            {/* Primitives Portal layer for dropdowns, tooltips, etc */}
+            <PortalHost />
+
+            {/* 🌟 GLOBAL INTERACTIVE THEME CONTROLLER OVERLAY */}
+            <View 
+              pointerEvents="box-none" 
+              className="absolute top-12 right-6 z-[999] flex-row justify-end items-center"
+            >
+              <Pressable 
+                onPress={toggleColorScheme}
+                className="h-11 w-11 rounded-full bg-card/90 border border-border items-center justify-center shadow-md active:scale-95 transition-transform backdrop-blur-md"
+              >
+                {colorScheme === 'dark' ? (
+                  <Sun size={20} color="#ec7f13" strokeWidth={2.5} />
+                ) : (
+                  <Moon size={20} color="#4B3621" strokeWidth={2.5} />
+                )}
+              </Pressable>
+            </View>
           </View>
-        </View>
+        {/* </PushNotificationManager> */}
       </ThemeProvider>
     </QueryClientProvider>
   );

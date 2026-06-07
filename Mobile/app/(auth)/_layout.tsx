@@ -16,6 +16,7 @@ export default function AuthLayout() {
       <Stack.Screen name="sign-up" />
       <Stack.Screen name="otp-verify" />
       <Stack.Screen name="recovery" />
+      <Stack.Screen name="sign-in-biometric" />
     </Stack>
   );
 }
