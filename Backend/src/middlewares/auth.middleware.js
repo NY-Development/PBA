@@ -11,9 +11,7 @@ export const protect = async (req, res, next) => {
       });
     }
     
-    const accessToken = authHeaders.split(" ")[0];
-    
-    console.log("The access token is:", accessToken)
+    const accessToken = authHeaders.split(" ")[1];
 
     if (!accessToken) {
       return res.status(401).json({

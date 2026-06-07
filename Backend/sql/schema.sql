@@ -6,9 +6,9 @@ CREATE TABLE IF NOT EXISTS users (
   password TEXT NOT NULL,
   first_name     VARCHAR(255) NOT NULL,
   last_name     VARCHAR(255) NOT NULL,
-  role          VARCHAR(20) NOT NULL DEFAULT 'customer',  -- customer | vendor | admin
+  role          VARCHAR(20) NOT NULL DEFAULT 'customer',
   avatar_url    TEXT,
-  avatar_public_id TEXT, -- for cloudinary
+  avatar_public_id TEXT, 
   is_active     BOOLEAN DEFAULT TRUE,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
@@ -117,6 +117,29 @@ CREATE TABLE IF NOT EXISTS reviews (
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(product_id, user_id)
 );
+
+-- payments
+CREATE TABLE payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  vendor_id UUID NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  payment_method VARCHAR(50),
+  transaction_reference VARCHAR(255),
+  description TEXT,
+  payment_date DATE NOT NULL,
+  proof_image_url TEXT,
+  proof_public_id TEXT,
+  status VARCHAR(20) DEFAULT 'pending',
+  order_id UUID NOT NULL REFERENCES orders(id),
+  reviewed_by UUID,
+  reviewed_at TIMESTAMP,
+
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_products_vendor   ON products(vendor_id);

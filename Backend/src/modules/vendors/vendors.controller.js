@@ -9,7 +9,8 @@ const register = async (req, res) => {
       userId: req.user.userId, 
       bodyData: req.body,
       logo_buffer: req.files.logo[0].buffer,
-      banner_buffer: req.files.banner[0].buffer
+      banner_buffer: req.files.banner[0].buffer,
+      license_buffer: req.files.license[0].buffer
     });
 
     return res.status(200).json({

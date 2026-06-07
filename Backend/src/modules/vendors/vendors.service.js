@@ -19,6 +19,7 @@ const register = async ({
   userId,
   logo_buffer,
   banner_buffer,
+  license_buffer,
   bodyData
 }) => {
   const { 
@@ -37,8 +38,15 @@ const register = async ({
   const vendorExists = await VendorsRepository.findVendorById
   if(vendorExists) throw new Error("you've already been registered as vendor")
   
-  const logoResult = await uploadToCloudinary(logo_buffer, `vendors/logo-${userId}`)
-  const bannerResult = await uploadToCloudinary(banner_buffer, `vendors/banner-${userId}`)
+  const logoResult = await uploadToCloudinary(logo_buffer, `vendors/logo/${userId}`)
+  const bannerResult = await uploadToCloudinary(banner_buffer, `vendors/banner/${userId}`)
+  const licenseResult = await uploadToCloudinary(
+    license_buffer, 
+    `vendors/license/${userId}`,
+    {
+      type: "private"
+    },
+  )
 
   const vendor = await VendorsRepository.register({
     userId,
@@ -46,8 +54,10 @@ const register = async ({
     description,
     payout_email,
     tin_number,
+    license_type: licenseResult.resource_type,
     logo_url: logoResult.secure_url,
     banner_url: bannerResult.secure_url,
+    license_public_id: licenseResult.public_id,
     logo_public_id: logoResult.public_id,
     banner_public_id: bannerResult.public_id,
   })
@@ -56,12 +66,17 @@ const register = async ({
     to: "matusalasana@gmail.com",
     subject: "New Vendor Application",
     template: baseEmailTemplate({
+      appName: "PBA",
       headerIcon: "📩",
-      title: "New Vendor Application",
-      subtitle: "waiting for your approval",
-      message: `Store named ${store_name} applied to become vendor`,
-    })
-  })
+      title: `${store_name} wants to join PBA`,
+  
+      subtitle: "Waiting for your approval.",
+      greeting: `Hello,`,
+      message: "Please verify the vendor documents uploaded and take necessary steps to proceed.",
+      alertType: "info",
+      buttonText: "Open Dashboard",
+    }),
+  });
 
   return vendor;
 };

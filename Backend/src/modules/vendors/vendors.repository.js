@@ -7,16 +7,18 @@ const register = async({
   description,
   payout_email,
   tin_number,
+  license_type,
   logo_url,
   banner_url,
+  license_public_id,
   logo_public_id,
   banner_public_id
 }) => {
   const result = await sql`
     INSERT INTO vendors
-      (store_name, description, payout_email, tin_number, logo_url, banner_url, user_id, banner_public_id, logo_public_id)
+      (store_name, description, payout_email, tin_number, license_type, logo_url, banner_url, user_id, banner_public_id, logo_public_id, license_public_id)
     VALUES 
-      (${store_name}, ${description}, ${payout_email}, ${tin_number}, ${logo_url}, ${banner_url}, ${userId}, ${banner_public_id}, ${logo_public_id})
+      (${store_name}, ${description}, ${payout_email}, ${tin_number}, ${license_type}, ${logo_url}, ${banner_url}, ${userId}, ${banner_public_id}, ${logo_public_id}, ${license_public_id})
     RETURNING *
   `
   return result[0];

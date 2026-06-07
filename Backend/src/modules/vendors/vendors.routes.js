@@ -13,6 +13,7 @@ router.post(
   protect,
   upload.fields([
     { name: "logo", maxCount: 1 },
+    { name: "license", maxCount: 1 },
     { name: "banner", maxCount: 1 },
   ]),
   VendorsController.register

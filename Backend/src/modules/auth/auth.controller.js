@@ -228,5 +228,4 @@ export const AuthController = {
   forgotPassword,
   resetPassword,
   resendOTP,
-  updateProfilePicture
 }

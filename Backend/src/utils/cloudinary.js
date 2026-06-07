@@ -36,3 +36,21 @@ export const deleteFromCloudinary = async (
     throw new Error(error.message);
   }
 };
+
+export const generatePrivateFileUrl = (
+  publicId,
+  resourceType = "auto"
+) => {
+
+  const timestamp = Math.round(Date.now() / 1000);
+
+  return cloudinary.utils.private_download_url(
+    publicId,
+    null,
+    {
+      resource_type: resourceType,
+      expires_at: timestamp + 60 * 5 // 5 mins
+    }
+  );
+
+};

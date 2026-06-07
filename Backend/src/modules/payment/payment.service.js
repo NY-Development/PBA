@@ -27,43 +27,27 @@ const verifyCBE = async({
   
     template: baseEmailTemplate({
       headerIcon: "✅",
-  
       title: "You have successfully ordered the:",
-  
-      subtitle:
-        "You can now track delivery.",
-  
+      subtitle: "You can now track delivery.",
       greeting: "Hello Sana,",
-  
-      message:
-        "Congratulations! Your application has been approved successfully.",
-  
-      highlightContent:
-        "Your vendor account is now active.",
-  
+      message: "Congratulations! Your application has been approved successfully.",
+      highlightContent: "Your vendor account is now active. You can now:",
       alertType: "success",
-  
       listItems: [
         "Add products",
         "Manage inventory",
         "Track orders",
         "Receive payouts",
       ],
-  
       buttonText: "Open Dashboard",
-  
-      buttonUrl:
-        "https://yourapp.com/vendor/dashboard",
-  
+      buttonUrl: "https://yourapp.com/vendor/dashboard",
       supportEmail: "support@yourapp.com",
-  
-      footerText:
-        "Thank you for using PBA.",
+      footerText: "Thank you for using PBA.",
     }),
   });
   
   return response.data;
-}
+};
 
 const verifyTelebirr = async({
   userId,
@@ -87,4 +71,4 @@ const verifyTelebirr = async({
 export const PaymentService = {
   verifyCBE,
   verifyTelebirr
-}
+};
