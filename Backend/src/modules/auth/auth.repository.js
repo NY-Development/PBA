@@ -37,12 +37,12 @@ const createToken = async ({
        ${token}, 
        Now () + INTERVAL '7 days'
     )
-     RETURNING *`
+     RETURNING *`;
 
     return result[0] || null;
 };
 
-const findTokenBySession = async ({token_id}) => {
+const findTokenBySession = async (token_id) => {
   const result = await sql`
     SELECT * FROM refresh_tokens 
     WHERE id = ${token_id}
@@ -101,6 +101,15 @@ const resetPassword = async({email, password}) => {
   return result[0] || null;
 }
 
+const logoutAll = async({userId}) => {
+  const result = await sql`
+    DELETE FROM refresh_tokens
+    WHERE user_id=${userId}
+    RETURNING *
+  `
+  return result[0] || null;
+}
+
 
 export const AuthRepository = {
   findUserByEmail,
@@ -111,4 +120,5 @@ export const AuthRepository = {
   updateUser,
   findUserById,
   resetPassword,
+  logoutAll,
 }

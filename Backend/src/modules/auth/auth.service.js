@@ -190,7 +190,7 @@ const logout = async(payload) => {
   
   if(!session_id) throw new Error("session_id not found");
   
-  const session = await AuthRepository.findTokenBySession({token_id: session_id});
+  const session = await AuthRepository.findTokenBySession(session_id);
   
   if (!session) throw new Error("Session not found");
   
@@ -202,6 +202,25 @@ const logout = async(payload) => {
   });
   
   return result;
+};
+
+// LOGOUT ALL
+const logoutAll = async({ session_id, userId}) => {
+  if(!userId) throw new Error("UserId not found");
+  if(!session_id) throw new Error("session_id not found");
+  
+  const user = await AuthRepository.findUserById(userId);
+  if(!user) throw new Error("User not found");
+  if(!user.is_active) throw new Error("Account is not active");
+  
+  const session = await AuthRepository.findTokenBySession(session_id);
+  if(!session) throw new Error("session not found");
+  
+  await AuthRepository.logoutAll();
+  
+  return {
+    message: "All sessions deleted"
+  }
 };
 
 // GET ME
@@ -228,7 +247,7 @@ const refresh = async(oldRefreshToken, payloadData) => {
   
   if(!user) throw new Error("User not found");
   
-  const session = await AuthRepository.findTokenBySession({token_id: session_id});
+  const session = await AuthRepository.findTokenBySession(session_id);
   
   if (!session) throw new Error("Session not found");
 
@@ -452,4 +471,5 @@ export const AuthService = {
   forgotPassword,
   resetPassword,
   resendOTP,
+  logoutAll
 }

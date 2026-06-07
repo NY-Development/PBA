@@ -31,29 +31,20 @@ router.post(
   AuthController.logout
 );
 
-router.patch(
-  "/update", 
-  protect,
-  upload.single("avatar"),
-  validate(updateUserSchema),
-  AuthController.update
-);
-
 router.post(
   "/refresh", 
   protect, 
   AuthController.refresh
 );
 
-router.get(
-  "/me", 
-  protect, 
-  AuthController.getMe
-);
-
 router.post(
   "/verify-email", 
   AuthController.verifyEmail
+);
+
+router.post(
+  "/resend-otp", 
+  AuthController.resendOTP
 );
 
 router.post(
@@ -67,9 +58,28 @@ router.post(
 );
 
 router.post(
-  "/resend-otp", 
-  AuthController.resendOTP
+  "/logout-all", 
+  protect, 
+  AuthController.logoutAll
 );
+
+router.get(
+  "/me", 
+  protect, 
+  AuthController.getMe
+);
+
+
+
+router.patch(
+  "/update", 
+  protect,
+  upload.single("avatar"),
+  validate(updateUserSchema),
+  AuthController.update
+);
+
+
 
 
 export default router;

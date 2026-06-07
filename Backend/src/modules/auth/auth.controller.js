@@ -103,6 +103,24 @@ const logout = async(req, res) => {
   }
 };
 
+// LOGOUT ALL
+const logoutAll = async(req, res) => {
+  try{
+    await AuthService.logout(req.user);
+    
+    await Cookie.clearRefreshToken(res);
+  
+    return res.status(200).json({
+      message: "All sessions deleted successfully"
+    });
+  }catch(err){
+    logger.error("Error logging all out:", err.message);
+    return res.status(500).json({
+      message: err.message || "server error"
+    });
+  }
+};
+
 // GET ME
 const getMe = async (req, res) => {
   try {
@@ -228,4 +246,5 @@ export const AuthController = {
   forgotPassword,
   resetPassword,
   resendOTP,
+  logoutAll,
 }
