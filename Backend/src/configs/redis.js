@@ -7,12 +7,25 @@ export const redisClient = createClient({
   url: Env.REDIS_URL,
 });
 
+let redisErrorLogged = false;
+let redisReconnectCooldown = false;
+
 redisClient.on('ready', () => {
   logger.info('✅ Redis connected');
 });
 
 redisClient.on('error', (err) => {
+  if (redisReconnectCooldown) return;
+
   logger.warn(`⚠️ Redis Error: ${err.message}`);
+
+  redisErrorLogged = true;
+  redisReconnectCooldown = true;
+
+  // reset after cooldown
+  setTimeout(() => {
+    redisReconnectCooldown = false;
+  }, 30000); // 30 seconds
 });
 
 export const connectRedis = async () => {

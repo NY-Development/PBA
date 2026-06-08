@@ -24,11 +24,10 @@
   ],
   "version": "1.0.0",
   "main": "server.js",
-  "scripts": {
+ "scripts": {
     "start": "node src/server.js",
     "server": "nodemon src/server.js",
-    "redis": "redis-server --port 6380",
-    "dev": "concurrently \"npm run redis\" \"npm run server\""
+    "dev": "npm run server"
   },
   "license": "ISC",
   "type": "module",
