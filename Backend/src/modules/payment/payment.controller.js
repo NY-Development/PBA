@@ -6,13 +6,12 @@ const verifyCBE = async(req, res) => {
   try{
     const data = await PaymentService.verifyCBE({
       userId: req.user.userId,
-      bodyData: req.body
+      reference: req.body.reference,
+      accountSuffix: req.body.accountSuffix,
+      order_id: req.body.order_id
     });
     
-    res.status(200).json({
-      message: "Payment verified successfully",
-      data
-    });
+    res.status(200).json(data);
   }catch(err){
     logger.error(
       `Error verifying payment: ${
@@ -32,10 +31,7 @@ const verifyTelebirr = async(req, res) => {
       bodyData: req.body
     });
     
-    res.status(200).json({
-      message: "Payment verified successfully",
-      data
-    });
+    res.status(200).json(data);
   }catch(err){
     logger.error(
       `Error verifying payment: ${

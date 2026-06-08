@@ -3,7 +3,8 @@ import { HashUtils } from "../../utils/hash.js";
 import { CacheService } from "../../utils/cache.js";
 import { JWT } from "../../utils/jwt.js";
 import { AuthRepository } from "./auth.repository.js";
-import { createOTP } from "../../services/otp/otp.service.js";
+import { OTPRepository } from "../../services/otp/otp.service.js";
+import { generateOTP } from "../../services/otp/otp.service.js";
 import { sendEmail } from "../../services/email/email.service.js";
 import { baseEmailTemplate } from "../../templates/email.template.js";
 import { 
@@ -25,7 +26,7 @@ const register = async (data) => {
   const hashedPassword =
     await HashUtils.hashPassword(password);
     
-  const otp = createOTP();
+  const otp = generateOTP();
   
   const hashedOTP = await HashUtils.hashOTP(otp);
 
@@ -44,6 +45,12 @@ const register = async (data) => {
     userData,
     600
   );
+  
+  await OTPRepository.create({
+    email,
+    otp: hashedOTP,
+    type: "register"
+  });
 
   sendEmail({
   to: email,
@@ -121,15 +128,15 @@ const verifyEmail = async ({ email, otp }) => {
 
   const cacheKey = `otp:register:${email}`;
 
-  const pendingUser = await CacheService.get(cacheKey);
+  let pendingUser = await CacheService.get(cacheKey);
 
+  // fallback to DB if Redis misses
   if (!pendingUser) {
-    throw new Error(
-      "OTP expired or registration not found"
-    );
+    pendingUser = await OTPRepository.findOTP({
+      email,
+      type: "register",
+    });
   }
-  
-  if(!otp) throw new Error("OTP not provided");
 
   const isOtpValid = await HashUtils.compareOTP(
     otp,
@@ -148,6 +155,11 @@ const verifyEmail = async ({ email, otp }) => {
   });
 
   await CacheService.del(cacheKey);
+
+  await OTPRepository.deleteOTP({
+    email,
+    type: "register",
+  });
 
   const session_id = randomUUID();
 
@@ -255,8 +267,6 @@ const refresh = async(oldRefreshToken, payloadData) => {
   
   if (!session.token) throw new Error("Refresh token not found");
   
-  if(!session.token) throw new Error("Refresh Token not found");
-  
   const isTokenValid = await HashUtils.compareToken(
     oldRefreshToken, session.token
   );
@@ -332,7 +342,7 @@ const forgotPassword = async({email}) => {
   
   const cacheKey = `otp:reset:${email}`
   
-  const otp = createOTP();
+  const otp = generateOTP();
   const hashedOTP = await HashUtils.hashOTP(otp);
   
   const userData = {
@@ -345,6 +355,12 @@ const forgotPassword = async({email}) => {
     userData,
     600
   );
+  
+  await OTPRepository.create({
+    email,
+    hashedOTP,
+    type: "reset"
+  })
   
   sendEmail({
     to: email,
@@ -372,21 +388,23 @@ const forgotPassword = async({email}) => {
 const resetPassword = async({email, otp, password}) => {
   const cacheKey = `otp:reset:${email}`;
   
-  const pendingUser = await CacheService.get(cacheKey);
-  
-  if (!pendingUser) {
-    throw new Error(
-      "OTP expired or registration not found"
-    );
+  if(!email || !otp || !password){
+    throw new Error("Missing required fields");
   }
   
-  if(!otp) throw new Error("OTP not provided")
+  let pendingUser = await CacheService.get(cacheKey);
+  
+  if (!pendingUser) {
+    pendingUser = await OTPRepository.findOTP({
+      email,
+      type: "reset"
+    })
+  }
 
-  const isOtpValid =
-    await HashUtils.compareOTP(
-      otp,
-      pendingUser.otp
-    );
+  const isOtpValid = await HashUtils.compareOTP(
+    otp,
+    pendingUser.otp
+  );
 
   if (!isOtpValid) {
     throw new Error("Invalid OTP");
@@ -401,6 +419,11 @@ const resetPassword = async({email, otp, password}) => {
   
   await CacheService.del(cacheKey);
   
+  await OTPRepository.deleteOTP({
+    email,
+    type: "reset"
+  })
+  
   return {
     message: "Password reset successfully"
   }
@@ -409,15 +432,13 @@ const resetPassword = async({email, otp, password}) => {
 
 // RESEND OTP
 const resendOTP = async ({ email, type }) => {
-  if(!type) throw new Error("OTP type not provided")
+  if(!type || !email){
+    throw new Error("Missing required fields")
+  }
   
   const cacheKey = `otp:${type}:${email}`;
 
-  const existing = await AuthRepository.findUserByEmail(email);
-
-  if (!existing) throw new Error("User not found");
-
-  const otp = createOTP();
+  const otp = generateOTP();
   const hashedOTP = await HashUtils.hashOTP(otp);
   
   const userData = {
@@ -427,13 +448,19 @@ const resendOTP = async ({ email, type }) => {
 
   await CacheService.set(cacheKey, userData, 600);
   
+  await OTPRepository.create({
+    email,
+    type,
+    hashedOTP
+  });
+  
   const subject = type==="reset" 
     ? `Your password reset code is ${otp}`
     : `Your email verification code is ${otp}`
   
   const title = type==="reset"
     ? "reset"
-    : "registeration"
+    : "registration"
   
 
   sendEmail({

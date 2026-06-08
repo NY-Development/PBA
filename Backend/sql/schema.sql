@@ -3,13 +3,16 @@
 CREATE TABLE IF NOT EXISTS users (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email         VARCHAR(255) UNIQUE NOT NULL,
-  password TEXT NOT NULL,
-  first_name     VARCHAR(255) NOT NULL,
-  last_name     VARCHAR(255) NOT NULL,
+  password      TEXT NOT NULL,
   role          VARCHAR(20) NOT NULL DEFAULT 'customer',
+  is_active     BOOLEAN DEFAULT TRUE,
+  
+  first_name    VARCHAR(255) NOT NULL,
+  last_name     VARCHAR(255) NOT NULL,
+  phone         VARCHAR(20),
   avatar_url    TEXT,
   avatar_public_id TEXT, 
-  is_active     BOOLEAN DEFAULT TRUE,
+  
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
@@ -35,11 +38,11 @@ CREATE TABLE IF NOT EXISTS vendors (
   banner_url      TEXT,
   status          VARCHAR(20) DEFAULT 'pending',
   payout_email    VARCHAR(255),
-  created_at      TIMESTAMPTZ DEFAULT NOW(),
-  updated_at      TIMESTAMPTZ DEFAULT NOW(),
   tin_number      VARCHAR(250) NOT NULL,
   logo_public_id  TEXT,
-  banner_public_id TEXT
+  banner_public_id TEXT,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- categories
@@ -75,13 +78,13 @@ CREATE TABLE IF NOT EXISTS addresses (
 -- orders
 CREATE TABLE IF NOT EXISTS orders (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID NOT NULL REFERENCES users(id),
+  user_id         UUID NOT NULL REFERENCES users(id),
   address_id      UUID REFERENCES addresses(id),
   status          VARCHAR(30) DEFAULT 'pending',
   subtotal        NUMERIC(10,2) NOT NULL,
   shipping_fee    NUMERIC(10,2) DEFAULT 0,
   total           NUMERIC(10,2) NOT NULL,
-  chapa_id    TEXT,
+  chapa_id        TEXT,
   notes           TEXT,
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
@@ -120,23 +123,43 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 -- payments
 CREATE TABLE payments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id),
-  vendor_id UUID NOT NULL,
+  id UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID      NOT NULL REFERENCES users(id),
+  vendor_id UUID    NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
-  payment_method VARCHAR(50),
+  payment_method    VARCHAR(50),
   transaction_reference VARCHAR(255),
-  description TEXT,
-  payment_date DATE NOT NULL,
-  proof_image_url TEXT,
-  proof_public_id TEXT,
-  status VARCHAR(20) DEFAULT 'pending',
-  order_id UUID NOT NULL REFERENCES orders(id),
-  reviewed_by UUID,
-  reviewed_at TIMESTAMP,
+  description       TEXT,
+  payment_date      DATE NOT NULL,
+  proof_image_url   TEXT,
+  proof_public_id   TEXT,
+  status            VARCHAR(20) DEFAULT 'pending',
+  order_id UUID     NOT NULL REFERENCES orders(id),
 
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  created_at        TIMESTAMP DEFAULT NOW(),
+  updated_at        TIMESTAMP DEFAULT NOW()
+);
+
+-- Payment accounts
+CREATE TABLE payment_accounts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider VARCHAR(30) NOT NULL,
+    account_number VARCHAR(255) NOT NULL,
+    account_holder VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, provider, account_number),
+);
+
+CREATE TABLE otps (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL,
+  otp VARCHAR(255) NOT NULL,
+  type VARCHAR(50) NOT NULL,
+
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 
@@ -149,3 +172,5 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_product   ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_id   ON refresh_tokens(id);
 CREATE INDEX IF NOT EXISTS idx_refresh_revoked ON refresh_tokens(is_revoked);
+CREATE INDEX IF NOT EXISTS idx_user_provider ON payment_accounts(user_id, provider),
+CREATE INDEX IF NOT EXISTS idx_provider ON payment_accounts (provider);

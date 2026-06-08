@@ -3,7 +3,6 @@ import { HashUtils } from "../../utils/hash.js";
 import { CacheService } from "../../utils/cache.js";
 import { JWT } from "../../utils/jwt.js";
 import { VendorsRepository } from "./vendors.repository.js";
-import { createOTP } from "../../services/otp/otp.service.js"
 import { sendEmail } from "../../services/email/email.service.js"
 import { 
   baseEmailTemplate,

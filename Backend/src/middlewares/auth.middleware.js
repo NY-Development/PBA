@@ -1,32 +1,36 @@
-
-import { JWT } from "../utils/jwt.js"
+import { JWT } from "../utils/jwt.js";
 
 export const protect = async (req, res, next) => {
   try {
-    const authHeaders = req.headers.authorization
-    
-    if(!authHeaders) {
-      res.status(404).json({
-        message: "authorization headers not found"
+    const authHeader = req.headers.authorization;
+
+    // 1. Safely check if the header exists and starts with "Bearer "
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Not authorized, no token provided",
       });
     }
-    
-    const accessToken = authHeaders.split(" ")[1];
+
+    // 2. Now it is completely safe to split
+    const accessToken = authHeader.split(" ")[1];
 
     if (!accessToken) {
       return res.status(401).json({
-        message: "Not authorized, no token",
+        message: "Not authorized, token format invalid",
       });
     }
 
+    // 3. Verify the token signature
     const decoded = await JWT.verifyAccessToken(accessToken);
 
+    // 4. Attach token payload metadata safely to the request state
     req.user = decoded;
 
     next();
   } catch (error) {
+    console.error("🔒 Auth Middleware Verification Crash:", error.message);
     return res.status(401).json({
-      message: error.message || "Invalid token",
+      message: "Not authorized, token verification failed",
     });
   }
 };

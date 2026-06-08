@@ -6,6 +6,10 @@ import { connectRedis } from './configs/redis.js';
 import { transporter } from './configs/email.js';
 
 
+// For Moble app to work locally
+const HOST = '0.0.0.0'
+
+
 const startServer = async () => {
   try {
     // 0. Warmup SMTP
@@ -21,7 +25,7 @@ const startServer = async () => {
 
     // 3. Start Express Server
     app.listen(Env.PORT, () => {
-      logger.info(`🚀 Server running on http://localhost:${Env.PORT}`);
+      logger.info(`🚀 Server running on http://${HOST}:${Env.PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

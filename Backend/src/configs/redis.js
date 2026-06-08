@@ -2,51 +2,33 @@ import { createClient } from 'redis';
 import { Env } from './env.js';
 import logger from '../utils/logger.js';
 
-let hasLoggedRedisError = false;
 
 export const redisClient = createClient({
   url: Env.REDIS_URL,
+});
 
-  socket: {
-    reconnectStrategy: (retries) => {
-      // Stop after 10 retries
-      if (retries > 10) {
-        logger.error('❌ Redis retry limit reached');
-        return false;
-      }
-
-      // retry every 2 seconds
-      return 2000;
-    },
-  },
+redisClient.on('ready', () => {
+  logger.info('✅ Redis connected');
 });
 
 redisClient.on('error', (err) => {
-  // Prevent console spam
-  if (!hasLoggedRedisError) {
-    logger.error(`Redis Client Error: ${err.message}`);
-    hasLoggedRedisError = true;
-  }
-});
-
-redisClient.on('connect', () => {
-  hasLoggedRedisError = false;
-  logger.info('✅ Redis connected');
+  logger.warn(`⚠️ Redis Error: ${err.message}`);
 });
 
 export const connectRedis = async () => {
   if (!Env.REDIS_URL) {
     logger.warn(
-      '⚠️ REDIS_URL not provided. Redis caching will be skipped.'
+      '⚠️ REDIS_URL missing. Running without Redis.'
     );
-    return null;
+
+    return;
   }
 
   try {
     await redisClient.connect();
-    return redisClient;
   } catch (err) {
-    logger.error('❌ Redis connection failed:', err);
-    return null;
+    logger.warn(
+      '⚠️ Failed to connect Redis. Falling back to database.'
+    );
   }
 };

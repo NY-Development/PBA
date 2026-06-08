@@ -1,9 +1,11 @@
 import { redisClient } from '../configs/redis.js';
 import logger from './logger.js';
 
-const get = async(key) => {
+const isRedisReady = () => redisClient?.isReady;
+
+const get = async (key) => {
   try {
-    if (!redisClient.isOpen) return null;
+    if (!isRedisReady()) return null;
 
     const data = await redisClient.get(key);
     return data ? JSON.parse(data) : null;
@@ -13,13 +15,9 @@ const get = async(key) => {
   }
 };
 
-const set = async(
-  key,
-  value,
-  ttlInSeconds = 3600
-) => {
+const set = async (key, value, ttlInSeconds = 3600) => {
   try {
-    if (!redisClient.isOpen) return;
+    if (!isRedisReady()) return;
 
     await redisClient.set(key, JSON.stringify(value), {
       EX: ttlInSeconds,
@@ -29,9 +27,9 @@ const set = async(
   }
 };
 
-const del = async(key) => {
+const del = async (key) => {
   try {
-    if (!redisClient.isOpen) return;
+    if (!isRedisReady()) return;
 
     await redisClient.del(key);
   } catch (error) {
@@ -39,14 +37,14 @@ const del = async(key) => {
   }
 };
 
-const delByPattern = async(pattern) => {
+const delByPattern = async (pattern) => {
   try {
-    if (!redisClient.isOpen) return;
+    if (!isRedisReady()) return;
 
     const keys = await redisClient.keys(pattern);
 
     if (keys.length > 0) {
-      await redisClient.del(keys);
+      await redisClient.del(...keys);
     }
   } catch (error) {
     logger.error(`Cache DelByPattern Error [${pattern}]:`, error);
@@ -58,4 +56,4 @@ export const CacheService = {
   set,
   del,
   delByPattern
-}
+};
