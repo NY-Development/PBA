@@ -19,9 +19,12 @@ const set = async (key, value, ttlInSeconds = 3600) => {
   try {
     if (!isRedisReady()) return;
 
-    await redisClient.set(key, JSON.stringify(value), {
-      EX: ttlInSeconds,
-    });
+    const options = {};
+    if (ttlInSeconds) {  // Only add EX if TTL is 
+      options.EX = ttlInSeconds;
+    }
+    
+    await redisClient.set(key, JSON.stringify(value), options);
   } catch (error) {
     logger.error(`Cache Set Error [${key}]:`, error);
   }
