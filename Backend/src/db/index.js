@@ -3,4 +3,4 @@ import { Env } from "../configs/env.js";
 
 
 
-const db = drizzle(Env.DATABASE_URL);
+export const db = drizzle(Env.DATABASE_URL);
