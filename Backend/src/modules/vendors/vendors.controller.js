@@ -1,5 +1,5 @@
 import { VendorsService } from "./vendors.service.js";
-import logger from "../../utils/logger.js"
+import logger from "../../utils/logger.js";
 
 
 // REGISTER
@@ -8,9 +8,9 @@ const register = async (req, res) => {
     const vendor = await VendorsService.register({
       userId: req.user.userId, 
       bodyData: req.body,
-      logo_buffer: req.files.logo[0].buffer,
-      banner_buffer: req.files.banner[0].buffer,
-      license_buffer: req.files.license[0].buffer
+      logo_buffer: req.files?.logo?.[0]?.buffer,
+      banner_buffer: req.files?.banner?.[0]?.buffer,
+      license_buffer: req.files?.license?.[0]?.buffer,
     });
 
     return res.status(200).json({
@@ -27,6 +27,7 @@ const register = async (req, res) => {
   }
 };
 
+// VERIFY VENDOR
 const verifyVendor = async(req, res) => {
   try{
     const data = await VendorsService.verifyVendor(req.body);
@@ -34,17 +35,17 @@ const verifyVendor = async(req, res) => {
     res.status(200).json({
       success: true,
       data
-    })
+    });
   }catch(err){
     logger.error(`Error verifying vendor: ${err.message}`);
     
     res.status(400).json({
       message: err.message
-    })
+    });
   }
 };
 
 export const VendorsController = {
   register,
   verifyVendor
-}
+};

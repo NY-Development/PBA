@@ -1,11 +1,27 @@
-import { sql } from "../../configs/db.js";
+import { db } from "../../db/index.js";
+import { users } from "../../db/schema/users.js";
+import { eq } from "drizzle-orm";
 
+// FIND USER BY EMAIL
 const findUserByEmail = async (email) => {
-  const result = await sql`
-    SELECT * FROM users 
-    WHERE email = ${email}
-  `;
-  return result[0] || null;
+  const result = await db
+    .select()
+    .from()
+    .where(eq(users.email, email))
+    .limit(1);
+    
+    return result[0];
+};
+
+// FIND USER BY ID
+const findUserById = async (id) => {
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+
+  return result[0];
 };
 
 const register = async ({
@@ -14,7 +30,7 @@ const register = async ({
   email,
   password
 }) => {
-  const result = await sql
+  const result = await db
     `INSERT INTO users 
       (first_name, last_name, email, password)
      VALUES (${first_name}, ${last_name}, ${email}, ${password})
@@ -23,12 +39,14 @@ const register = async ({
     return result[0] || null;
 };
 
+const register = async({})
+
 const createToken = async ({
   token_id,
   token,
   user_id
 }) => {
-  const result = await sql
+  const result = await db
     `INSERT INTO refresh_tokens
       (id, user_id, token, expires_at)
      VALUES (
@@ -43,7 +61,7 @@ const createToken = async ({
 };
 
 const findTokenBySession = async (token_id) => {
-  const result = await sql`
+  const result = await db`
     SELECT * FROM refresh_tokens 
     WHERE id = ${token_id}
   `;
@@ -51,7 +69,7 @@ const findTokenBySession = async (token_id) => {
 };
 
 const revokeToken = async ({ session_id, user_id }) => {
-  const result = await sql`
+  const result = await db`
     UPDATE refresh_tokens
     SET is_revoked = true
     WHERE id = ${session_id} AND user_id = ${user_id}
@@ -59,14 +77,6 @@ const revokeToken = async ({ session_id, user_id }) => {
   `;
 
   return result[0] || null
-};
-
-const findUserById = async (id) => {
-  const result = await sql`
-    SELECT * FROM users 
-    WHERE id = ${id}
-  `;
-  return result[0] || null;
 };
 
 const updateUser = async({
@@ -77,7 +87,7 @@ const updateUser = async({
   avatar_public_id
 }) => {
   
-  const result = await sql`
+  const result = await db`
     UPDATE users
     SET 
       first_name = COALESCE(${first_name}, first_name),
@@ -92,7 +102,7 @@ const updateUser = async({
 };
 
 const resetPassword = async({email, password}) => {
-  const result = await sql`
+  const result = await db`
     UPDATE users
     SET password=${password}
     WHERE email=${email}
@@ -102,7 +112,7 @@ const resetPassword = async({email, password}) => {
 }
 
 const logoutAll = async({userId}) => {
-  const result = await sql`
+  const result = await db`
     DELETE FROM refresh_tokens
     WHERE user_id=${userId}
     RETURNING *

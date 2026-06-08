@@ -1,55 +1,65 @@
-import { sql } from "../../configs/db.js";
+import { db } from "../../db/index.js";
 
+import { vendors } from "../../db/schema/vendors.js";
+import { users } from "../../db/schema/users.js";
 
-const register = async({
-  userId,
-  store_name,
-  description,
-  payout_email,
-  tin_number,
-  license_type,
-  logo_url,
-  banner_url,
-  license_public_id,
-  logo_public_id,
-  banner_public_id
-}) => {
-  const result = await sql`
-    INSERT INTO vendors
-      (store_name, description, payout_email, tin_number, license_type, logo_url, banner_url, user_id, banner_public_id, logo_public_id, license_public_id)
-    VALUES 
-      (${store_name}, ${description}, ${payout_email}, ${tin_number}, ${license_type}, ${logo_url}, ${banner_url}, ${userId}, ${banner_public_id}, ${logo_public_id}, ${license_public_id})
-    RETURNING *
-  `
+import { eq } from "drizzle-orm";
+
+const register = async (data) => {
+  const result = await db
+    .insert(vendors)
+    .values(data)
+    .returning();
+
   return result[0];
-}
+};
 
-const findUserById = async(id) => {
-  const result = await sql`
-    SELECT * FROM users
-    WHERE id=${id}
-  `
-}
+const findUserById = async (id) => {
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
 
-const findVendorById = async(id) => {
-  const result = await sql`
-    SELECT * FROM vendors
-    WHERE user_id=${id}
-  `
-}
-
-const verifyVendor = async(id) => {
-  const result = await sql`
-    UPDATE vendors
-    SET status='verified'
-    WHERE id=${id}
-    RETURNING *
-  `
   return result[0];
-}
+};
+
+const findVendorByUserId = async (userId) => {
+  const result = await db
+    .select()
+    .from(vendors)
+    .where(eq(vendors.userId, userId))
+    .limit(1);
+
+  return result[0];
+};
+
+const findVendorById = async (id) => {
+  const result = await db
+    .select()
+    .from(vendors)
+    .where(eq(vendors.id, id))
+    .limit(1);
+
+  return result[0];
+};
+
+const verifyVendor = async (id) => {
+  const result = await db
+    .update(vendors)
+    .set({
+      status: "verified",
+    })
+    .where(eq(vendors.id, id))
+    .returning();
+
+  return result[0];
+};
 
 export const VendorsRepository = {
   register,
   findUserById,
-  findVendorById
-}
+  findVendorByUserId,
+  findVendorById,
+  verifyVendor,
+};
