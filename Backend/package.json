@@ -27,6 +27,9 @@
   "scripts": {
     "start": "node src/server.js",
     "server": "nodemon src/server.js",
+    "gen": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "push": "drizzle-kit push",
     "dev": "npm run server"
   },
   "license": "ISC",
