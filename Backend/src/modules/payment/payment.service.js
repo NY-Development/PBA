@@ -14,7 +14,7 @@ const verifyCBE = async({
   order_id
 }) => {
   
-  if(!userId) throw new Error("User id is required")
+  if(!userId) throw new Error("User id is required");
   
   if(!reference || !accountSuffix || !order_id) throw new Error("Missing required fields");
   

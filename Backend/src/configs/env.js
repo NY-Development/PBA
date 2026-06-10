@@ -36,6 +36,10 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_USER = process.env.SMTP_USER;
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
+// brevoNODEMAILER TEST EMAIL 
+const TEST_USER = process.env.TEST_USER;
+const TEST_PASS = process.env.TEST_PASS;
+
 // CLOUDINARY
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
@@ -72,6 +76,9 @@ export const Env = {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
+  
+  TEST_USER,
+  TEST_PASS,
   
   PAYMENT_API_KEY
 }

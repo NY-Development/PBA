@@ -1,11 +1,12 @@
-import { sql } from "../../configs/db.js";
+import { db } from "../../db/index.js";
 
 
 const verifyCBE = async({
   userId,
   bodyData
 }) => {
-  
+  const result = await db
+    db.insert
 };
 
 

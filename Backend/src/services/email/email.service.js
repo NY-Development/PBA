@@ -9,7 +9,7 @@ export const sendEmail = async ({
   try {
     
     const info = await transporter.sendMail({
-      from: `"Peanut Store" <${Env.SENDER_EMAIL}>`,
+      from: `"Peanut Store" <${Env.NODE_ENV==="production" ? Env.SENDER_EMAIL : Env.TEST_EMAIL}>`,
       to,
       subject,
       html: template,
