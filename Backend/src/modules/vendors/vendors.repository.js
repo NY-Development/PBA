@@ -1,9 +1,8 @@
+import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
-
 import { vendors } from "../../db/schema/vendors.js";
 import { users } from "../../db/schema/users.js";
 
-import { eq } from "drizzle-orm";
 
 const register = async (data) => {
   const result = await db

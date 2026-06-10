@@ -106,7 +106,9 @@ const logout = async(req, res) => {
 // LOGOUT ALL
 const logoutAll = async(req, res) => {
   try{
-    await AuthService.logout(req.user);
+    await AuthService.logoutAll({
+      userId: req.user.userId
+    });
     
     await Cookie.clearRefreshToken(res);
   

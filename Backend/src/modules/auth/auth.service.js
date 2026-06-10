@@ -46,7 +46,7 @@ const register = async (data) => {
     600
   );
   
-  await OTPRepository.create({
+  await OTPRepository.createOTP({
     email,
     otp: hashedOTP,
     type: "register"
@@ -217,22 +217,21 @@ const logout = async(payload) => {
 };
 
 // LOGOUT ALL
-const logoutAll = async({ session_id, userId}) => {
+const logoutAll = async({
+  userId
+}) => {
   if(!userId) throw new Error("UserId not found");
-  if(!session_id) throw new Error("session_id not found");
   
   const user = await AuthRepository.findUserById(userId);
+  
   if(!user) throw new Error("User not found");
   if(!user.is_active) throw new Error("Account is not active");
   
-  const session = await AuthRepository.findTokenBySession(session_id);
-  if(!session) throw new Error("session not found");
-  
-  await AuthRepository.logoutAll();
+  await AuthRepository.logoutAll(userId);
   
   return {
     message: "All sessions deleted"
-  }
+  };
 };
 
 // GET ME
@@ -317,14 +316,22 @@ const updateUser = async ({
     avatar_url = uploaded.secure_url;
     avatar_public_id = uploaded.public_id;
   }
+  
+  const updateData = {};
 
-  const result = await AuthRepository.updateUser({
-    id: userId,
-    first_name,
-    last_name,
-    avatar_url,
-    avatar_public_id,
-  });
+  if (first_name !== undefined)
+    updateData.firstName = first_name;
+  
+  if (last_name !== undefined)
+    updateData.lastName = last_name;
+  
+  if (avatar_url !== undefined)
+    updateData.avatarUrl = avatar_url;
+  
+  if (avatar_public_id !== undefined)
+    updateData.avatarPublicId = avatar_public_id;
+
+  const result = await AuthRepository.updateUser(updateData);
 
   return result;
 };

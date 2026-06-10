@@ -1,12 +1,13 @@
 import { db } from "../../db/index.js";
 import { users } from "../../db/schema/users.js";
-import { eq } from "drizzle-orm";
+import { refreshTokens } from "../../db/schema/refreshTokens.js";
+import { eq, sql, and } from "drizzle-orm";
 
 // FIND USER BY EMAIL
 const findUserByEmail = async (email) => {
   const result = await db
     .select()
-    .from()
+    .from(users)
     .where(eq(users.email, email))
     .limit(1);
     
@@ -24,101 +25,117 @@ const findUserById = async (id) => {
   return result[0];
 };
 
+// REGISTER 
 const register = async ({
   first_name,
   last_name,
   email,
-  password
+  password,
 }) => {
-  const result = await db
-    `INSERT INTO users 
-      (first_name, last_name, email, password)
-     VALUES (${first_name}, ${last_name}, ${email}, ${password})
-     RETURNING *`
 
-    return result[0] || null;
+  const result = await db
+    .insert(users)
+    .values({
+      firstName: first_name,
+      lastName: last_name,
+      email,
+      password,
+    })
+    .returning();
+
+  return result[0];
 };
 
-const register = async({})
-
+// CREATE TOKEN
 const createToken = async ({
   token_id,
   token,
-  user_id
+  user_id,
 }) => {
+  
   const result = await db
-    `INSERT INTO refresh_tokens
-      (id, user_id, token, expires_at)
-     VALUES (
-       ${token_id}, 
-       ${user_id}, 
-       ${token}, 
-       Now () + INTERVAL '7 days'
-    )
-     RETURNING *`;
+    .insert(refreshTokens)
+    .values({
+      id: token_id,
+      userId: user_id,
+      token,
+      expiresAt: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ),
+    })
+    .returning();
 
-    return result[0] || null;
+  return result[0];
 };
 
+// FIND TOKEN BY SESSION
 const findTokenBySession = async (token_id) => {
-  const result = await db`
-    SELECT * FROM refresh_tokens 
-    WHERE id = ${token_id}
-  `;
+  const result = await db
+    .select()
+    .from(refreshTokens)
+    .where(eq(refreshTokens.id, token_id))
+    .limit(1);
+    
   return result[0] || null;
 };
 
+// REVOKE TOKEN
 const revokeToken = async ({ session_id, user_id }) => {
-  const result = await db`
-    UPDATE refresh_tokens
-    SET is_revoked = true
-    WHERE id = ${session_id} AND user_id = ${user_id}
-    RETURNING *
-  `;
+  const result = await db
+    .update(refreshTokens)
+    .set({
+      revoked: true
+    })
+    .where(
+      and(
+        eq(refreshTokens.id, session_id),
+        eq(refreshTokens.userId, user_id)
+      )
+    )
+    .returning();
 
-  return result[0] || null
+  return result[0] || null;
 };
 
-const updateUser = async({
-  id,
-  first_name,
-  last_name,
-  avatar_url,
-  avatar_public_id
+// UPDATE USER 
+const updateUser = async(updateData) => {
+  
+  const result = await db
+    .update(users)
+    .set(updateData)
+    .where(eq(users.id, id))
+    .returning();
+  
+  return result[0] || null;
+};
+
+// RESET PASSWORD 
+const resetPassword = async ({
+  email,
+  password,
 }) => {
-  
-  const result = await db`
-    UPDATE users
-    SET 
-      first_name = COALESCE(${first_name}, first_name),
-      last_name = COALESCE(${last_name}, last_name),
-      avatar_url = COALESCE(${avatar_url}, avatar_url),
-      avatar_public_id = COALESCE(${avatar_public_id}, avatar_public_id)
-    WHERE id=${id}
-    RETURNING *
-  `
-  
-  return result[0] || null;
+
+  const result = await db
+    .update(users)
+    .set({
+      password,
+    })
+    .where(eq(users.email, email))
+    .returning();
+
+  return result[0];
 };
 
-const resetPassword = async({email, password}) => {
-  const result = await db`
-    UPDATE users
-    SET password=${password}
-    WHERE email=${email}
-    RETURNING *
-  `
-  return result[0] || null;
-}
+// LOGOUT ALL
+const logoutAll = async (userId) => {
 
-const logoutAll = async({userId}) => {
-  const result = await db`
-    DELETE FROM refresh_tokens
-    WHERE user_id=${userId}
-    RETURNING *
-  `
-  return result[0] || null;
-}
+  const result = await db
+    .delete(refreshTokens)
+    .where(eq(refreshTokens.userId, userId))
+    .returning();
+
+  return result;
+};
 
 
 export const AuthRepository = {
@@ -131,4 +148,4 @@ export const AuthRepository = {
   findUserById,
   resetPassword,
   logoutAll,
-}
+};
