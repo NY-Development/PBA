@@ -14,8 +14,12 @@ import {
 
 
 // REGISTER
-const register = async (data) => {
-  const { first_name, last_name, email, password } = data;
+const register = async ({ 
+  firstName, 
+  lastName, 
+  email, 
+  password,
+}) => {
 
   const existing = await AuthRepository.findUserByEmail(email);
 
@@ -23,8 +27,7 @@ const register = async (data) => {
     throw new Error("User with this email already exists");
   }
 
-  const hashedPassword =
-    await HashUtils.hashPassword(password);
+  const hashedPassword = await HashUtils.hashPassword(password);
     
   const otp = generateOTP();
   
@@ -33,8 +36,8 @@ const register = async (data) => {
   const cacheKey = `otp:register:${email}`;
 
   const userData = {
-    first_name,
-    last_name,
+    firstName,
+    lastName,
     email,
     password: hashedPassword,
     otp: hashedOTP,
@@ -49,7 +52,10 @@ const register = async (data) => {
   await OTPRepository.createOTP({
     email,
     otp: hashedOTP,
-    type: "register"
+    type: "register",
+    firstName,
+    lastName,
+    password: hashedPassword,
   });
 
   sendEmail({
@@ -73,6 +79,85 @@ const register = async (data) => {
   };
 };
 
+// EMAIL VERIFICATION
+const verifyEmail = async ({ email, otp }) => {
+  
+  if(!email || !otp) throw new Error("Missing required fields");
+  
+  const cacheKey = `otp:register:${email}`;
+
+  let pendingUser = await CacheService.get(cacheKey);
+
+  if (!pendingUser) {
+    pendingUser = await OTPRepository.findOTP({
+      email,
+      type: "register",
+    });
+  }
+  
+  if (!pendingUser) {
+    throw new Error("OTP expired or invalid");
+  }
+  
+  const emailMatch = email === pendingUser.email;
+  if(!emailMatch) throw new Error("Email doesn't match");
+
+  const isOtpValid = await HashUtils.compareOTP(
+    otp,
+    pendingUser.otp
+  );
+
+  if (!isOtpValid) {
+    throw new Error("Invalid OTP");
+  }
+
+  const user = await AuthRepository.register({
+    firstName: pendingUser.firstName,
+    lastName: pendingUser.lastName,
+    email: pendingUser.email,
+    password: pendingUser.password,
+  });
+
+  await CacheService.del(cacheKey);
+
+  await OTPRepository.deleteOTP({
+    email,
+    type: "register",
+  });
+
+  const sessionId = randomUUID();
+
+  const payload = {
+    userId: user.id,
+    role: user.role,
+    sessionId,
+  };
+
+  const accessToken = await JWT.generateAccessToken(payload);
+
+  const refreshToken = await JWT.generateRefreshToken(payload);
+
+  const hashedToken = await HashUtils.hashToken(refreshToken);
+
+  await AuthRepository.createToken({
+    sessionId,
+    userId: user.id,
+    token: hashedToken,
+  });
+
+  return {
+    user: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    },
+    accessToken,
+    refreshToken,
+  };
+};
+
 // LOGIN
 const login = async (data) => {
   const { email, password } = data;
@@ -85,14 +170,14 @@ const login = async (data) => {
     await HashUtils.comparePassword(password, user.password);
   if (!isMatch) throw new Error("Incorrect password");
   
-  if (!user.is_active) throw new Error("Account banned or deactivated, please contact support");
+  if (!user.isActive) throw new Error("Account banned or deactivated, please contact support");
   
-  const session_id = randomUUID();
+  const sessionId = randomUUID();
   
   const payload = {
     userId: user.id,
     role: user.role,
-    session_id,
+    sessionId,
   };
   
   const accessToken = await JWT.generateAccessToken(payload);
@@ -101,116 +186,44 @@ const login = async (data) => {
   const hashedToken = await HashUtils.hashToken(refreshToken);
   
   await AuthRepository.createToken({
-    token_id: session_id,
-    user_id: user.id,
+    sessionId,
+    userId: user.id,
     token: hashedToken
   });
   
   return { 
     user:{
+      isActive: user.isActive,
       id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
-      avatar_url: user.avatar_url,
-      is_active: user.is_active,
+      avatar_url: user.avatarUrl,
     }, 
     accessToken,
     refreshToken
   };
 };
 
-// EMAIL VERIFICATION
-const verifyEmail = async ({ email, otp }) => {
-  
-  if(!email || !otp) throw new Error("Missing required fields");
-
-  const cacheKey = `otp:register:${email}`;
-
-  let pendingUser = await CacheService.get(cacheKey);
-
-  // fallback to DB if Redis misses
-  if (!pendingUser) {
-    pendingUser = await OTPRepository.findOTP({
-      email,
-      type: "register",
-    });
-  }
-
-  const isOtpValid = await HashUtils.compareOTP(
-    otp,
-    pendingUser.otp
-  );
-
-  if (!isOtpValid) {
-    throw new Error("Invalid OTP");
-  }
-
-  const user = await AuthRepository.register({
-    first_name: pendingUser.first_name,
-    last_name: pendingUser.last_name,
-    email: pendingUser.email,
-    password: pendingUser.password,
-  });
-
-  await CacheService.del(cacheKey);
-
-  await OTPRepository.deleteOTP({
-    email,
-    type: "register",
-  });
-
-  const session_id = randomUUID();
-
-  const payload = {
-    userId: user.id,
-    role: user.role,
-    session_id,
-  };
-
-  const accessToken = await JWT.generateAccessToken(payload);
-
-  const refreshToken = await JWT.generateRefreshToken(payload);
-
-  const hashedToken = await HashUtils.hashToken(refreshToken);
-
-  await AuthRepository.createToken({
-    token_id: session_id,
-    user_id: user.id,
-    token: hashedToken,
-  });
-
-  return {
-    user: {
-      id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      role: user.role,
-    },
-    accessToken,
-    refreshToken,
-  };
-};
-
 // LOGOUT
 const logout = async(payload) => {
-  const { session_id, userId } = payload;
+  const { sessionId, userId } = payload;
   
   if(!userId) throw new Error("User not found");
   
-  if(!session_id) throw new Error("session_id not found");
+  if(!sessionId) throw new Error("sessionId not found");
   
-  const session = await AuthRepository.findTokenBySession(session_id);
+  const session = await AuthRepository.findTokenBySession(sessionId);
   
   if (!session) throw new Error("Session not found");
   
   if(session.revoked) throw new Error("This session has already been revoked");
   
+  
   const result = await AuthRepository.revokeToken({
-    user_id: userId,
-    session_id
+    userId,
+    sessionId
   });
   
   return result;
@@ -218,14 +231,23 @@ const logout = async(payload) => {
 
 // LOGOUT ALL
 const logoutAll = async({
-  userId
+  userId,
+  sessionId
 }) => {
   if(!userId) throw new Error("UserId not found");
   
   const user = await AuthRepository.findUserById(userId);
   
   if(!user) throw new Error("User not found");
-  if(!user.is_active) throw new Error("Account is not active");
+  if(!user.isActive) throw new Error("Account is not active");
+  
+  if(!sessionId) throw new Error("sessionId not found");
+  
+  const session = await AuthRepository.findTokenBySession(sessionId);
+  
+  if (!session) throw new Error("Session not found");
+  
+  if(session.revoked) throw new Error("This session has already been revoked");
   
   await AuthRepository.logoutAll(userId);
   
@@ -235,7 +257,10 @@ const logoutAll = async({
 };
 
 // GET ME
-const getMe = async (userId) => {
+const getMe = async ({
+  userId,
+  sessionId
+}) => {
   if(!userId) throw new Error("User id not found");
   
   const user = await AuthRepository.findUserById(userId);
@@ -243,28 +268,46 @@ const getMe = async (userId) => {
   if (!user) {
     throw new Error("User not found");
   }
-  return user;
+  
+  if(!sessionId) throw new Error("sessionId not found");
+  
+  const session = await AuthRepository.findTokenBySession(sessionId);
+  
+  if (!session) throw new Error("Session not found");
+  
+  if(session.revoked) throw new Error("This session has already been revoked");
+  
+  return {
+      isActive: user.isActive,
+      role: user.role,
+      email: user.email
+  };
 };
 
 // REFRESH
-const refresh = async(oldRefreshToken, payloadData) => {
-  const { userId, session_id } = payloadData;
+const refresh = async({
+  userId,
+  sessionId,
+  oldRefreshToken
+}) => {
   
   if(!userId) throw new Error("User id not found");
   
-  if(!session_id) throw new Error("session_id not found");
+  if(!sessionId) throw new Error("sessionId not found");
   
   const user = await AuthRepository.findUserById(userId);
   
   if(!user) throw new Error("User not found");
   
-  const session = await AuthRepository.findTokenBySession(session_id);
+  const session = await AuthRepository.findTokenBySession(sessionId);
   
   if (!session) throw new Error("Session not found");
-
-  if (session.revoked) throw new Error("This session has already been revoked");
   
   if (!session.token) throw new Error("Refresh token not found");
+
+  if (session.revoked) throw new Error("This session has already been revoked/logged out");
+  
+  if (!oldRefreshToken) throw new Error("oldRefresh token not found");
   
   const isTokenValid = await HashUtils.compareToken(
     oldRefreshToken, session.token
@@ -275,65 +318,12 @@ const refresh = async(oldRefreshToken, payloadData) => {
   const payload = {
     userId: user.id,
     role: user.role,
-    session_id,
+    sessionId,
   };
   
   const newAccessToken = await JWT.generateAccessToken(payload);
   
   return { newAccessToken };
-};
-
-// UPDATE
-const updateUser = async ({
-  userId,
-  bodyData,
-  avatar_buffer,
-}) => {
-
-  const { first_name, last_name } = bodyData;
-
-  if (!userId) {
-    throw new Error("User id not found");
-  }
-
-  const user = await AuthRepository.findUserById(userId);
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  let avatar_url = user.avatar_url;
-  let avatar_public_id = user.avatar_public_id;
-
-  if (avatar_buffer) {
-    const uploaded = await uploadToCloudinary(
-      avatar_buffer,
-      `profiles/${userId}`
-    );
-    if (user.avatar_public_id) {
-      await deleteFromCloudinary(user.avatar_public_id);
-    }
-    avatar_url = uploaded.secure_url;
-    avatar_public_id = uploaded.public_id;
-  }
-  
-  const updateData = {};
-
-  if (first_name !== undefined)
-    updateData.firstName = first_name;
-  
-  if (last_name !== undefined)
-    updateData.lastName = last_name;
-  
-  if (avatar_url !== undefined)
-    updateData.avatarUrl = avatar_url;
-  
-  if (avatar_public_id !== undefined)
-    updateData.avatarPublicId = avatar_public_id;
-
-  const result = await AuthRepository.updateUser(updateData);
-
-  return result;
 };
 
 // FORGOT PASSWORD
@@ -345,7 +335,7 @@ const forgotPassword = async({email}) => {
 
   if(!existing) throw new Error("User with this email doesn't exist");
   
-  if (!existing.is_active) throw new Error("Your account temporarily locked");
+  if (!existing.isActive) throw new Error("Your account temporarily locked");
   
   const cacheKey = `otp:reset:${email}`
   
@@ -363,9 +353,9 @@ const forgotPassword = async({email}) => {
     600
   );
   
-  await OTPRepository.create({
+  await OTPRepository.createOTP({
     email,
-    hashedOTP,
+    otp: hashedOTP,
     type: "reset"
   })
   
@@ -406,6 +396,10 @@ const resetPassword = async({email, otp, password}) => {
       email,
       type: "reset"
     })
+  }
+  
+  if (!pendingUser) {
+    throw new Error("OTP expired or invalid")
   }
 
   const isOtpValid = await HashUtils.compareOTP(
@@ -455,10 +449,10 @@ const resendOTP = async ({ email, type }) => {
 
   await CacheService.set(cacheKey, userData, 600);
   
-  await OTPRepository.create({
+  await OTPRepository.createOTP({
     email,
     type,
-    hashedOTP
+    otp: hashedOTP
   });
   
   const subject = type==="reset" 
@@ -478,7 +472,6 @@ const resendOTP = async ({ email, type }) => {
       headerIcon: "🔐",
       title: otp,
       subtitle: `Enter this code to complete the ${title}`,
-      greeting: "Hello Sana,",
       message:
         "This code will expire in 10 minutes. If you didn't request this pin, we recommend you change your PBA password. Go to Settings & Privacy > Sign in & security > Change password. To further secure your account, you should also enable two-step verification",
   
@@ -499,7 +492,6 @@ export const AuthService = {
   login,
   logout,
   refresh,
-  updateUser,
   getMe,
   verifyEmail,
   forgotPassword,

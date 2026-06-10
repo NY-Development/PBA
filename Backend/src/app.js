@@ -8,6 +8,7 @@ import routes from "./routes/index.js";
 import { 
   loggerMiddleware } from './middlewares/logger.middleware.js';
 import { Env } from "./configs/env.js";
+import { indexTemplate } from "./templates/index.js";
 
 export const app = express();
 
@@ -45,6 +46,6 @@ app.use('/api/', limiter);
 app.use("/api/v1", routes);
 
 // Health Check
-app.get('/api/v1/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.use('/', (req, res) => {
+  res.send(indexTemplate());
 });

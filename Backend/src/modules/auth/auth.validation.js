@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const registerSchema = z.object({
-  first_name: z.string().min(3),
-  last_name: z.string().min(3),
+  firstName: z.string().min(3),
+  lastName: z.string().min(3),
   email: z.string().email().trim(),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
@@ -10,10 +10,4 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email().trim(),
   password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-export const updateUserSchema = z.object({
-  first_name: z.string().optional(),
-  last_name: z.string().optional(),
-  avatar_url: z.string().optional(),
 });

@@ -2,12 +2,10 @@ import { Router } from "express";
 
 import { protect, authorize } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
-import { upload } from "../../middlewares/upload.middleware.js";
 import { AuthController } from "./auth.controller.js";
 import { 
   registerSchema, 
-  loginSchema,
-  updateUserSchema
+  loginSchema
 } from "./auth.validation.js";
 
 
@@ -29,6 +27,12 @@ router.post(
   "/logout", 
   protect, 
   AuthController.logout
+);
+
+router.post(
+  "/logout-all", 
+  protect, 
+  AuthController.logoutAll
 );
 
 router.post(
@@ -57,26 +61,10 @@ router.post(
   AuthController.resetPassword
 );
 
-router.post(
-  "/logout-all", 
-  protect, 
-  AuthController.logoutAll
-);
-
 router.get(
   "/me", 
   protect, 
   AuthController.getMe
-);
-
-
-
-router.patch(
-  "/update", 
-  protect,
-  upload.single("avatar"),
-  validate(updateUserSchema),
-  AuthController.update
 );
 
 

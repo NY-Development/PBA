@@ -11,4 +11,4 @@ router.use("/vendors", vendorsRoutes);
 router.use("/payment", paymentRoutes);
 router.use("/users", usersRoutes);
 
-export default router
+export default router;

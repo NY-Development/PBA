@@ -27,8 +27,8 @@ const findUserById = async (id) => {
 
 // REGISTER 
 const register = async ({
-  first_name,
-  last_name,
+  firstName,
+  lastName,
   email,
   password,
 }) => {
@@ -36,8 +36,8 @@ const register = async ({
   const result = await db
     .insert(users)
     .values({
-      firstName: first_name,
-      lastName: last_name,
+      firstName,
+      lastName,
       email,
       password,
     })
@@ -48,16 +48,16 @@ const register = async ({
 
 // CREATE TOKEN
 const createToken = async ({
-  token_id,
+  sessionId,
   token,
-  user_id,
+  userId,
 }) => {
   
   const result = await db
     .insert(refreshTokens)
     .values({
-      id: token_id,
-      userId: user_id,
+      id: sessionId,
+      userId,
       token,
       expiresAt: new Date(
         Date.now() + 7 * 24 * 60 * 60 * 1000
@@ -80,7 +80,7 @@ const findTokenBySession = async (token_id) => {
 };
 
 // REVOKE TOKEN
-const revokeToken = async ({ session_id, user_id }) => {
+const revokeToken = async ({ sessionId, userId }) => {
   const result = await db
     .update(refreshTokens)
     .set({
@@ -88,24 +88,12 @@ const revokeToken = async ({ session_id, user_id }) => {
     })
     .where(
       and(
-        eq(refreshTokens.id, session_id),
-        eq(refreshTokens.userId, user_id)
+        eq(refreshTokens.id, sessionId),
+        eq(refreshTokens.userId, userId)
       )
     )
     .returning();
 
-  return result[0] || null;
-};
-
-// UPDATE USER 
-const updateUser = async(updateData) => {
-  
-  const result = await db
-    .update(users)
-    .set(updateData)
-    .where(eq(users.id, id))
-    .returning();
-  
   return result[0] || null;
 };
 
@@ -130,7 +118,10 @@ const resetPassword = async ({
 const logoutAll = async (userId) => {
 
   const result = await db
-    .delete(refreshTokens)
+    .update(refreshTokens)
+    .set({
+      revoked: true
+    })
     .where(eq(refreshTokens.userId, userId))
     .returning();
 
@@ -144,7 +135,6 @@ export const AuthRepository = {
   createToken,
   findTokenBySession,
   revokeToken,
-  updateUser,
   findUserById,
   resetPassword,
   logoutAll,
