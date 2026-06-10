@@ -1,6 +1,99 @@
 import { UsersRepository } from "./users.repository.js";
 import { CacheService } from "../../utils/cache.js";
+import { AuthRepository } from "../auth/auth.repository.js";
 
+
+// GET USER PROFILE
+const getUserProfile = async({
+  userId,
+  sessionId
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const user = await AuthRepository.findUserById(userId);
+  if(!user) throw new Error("User not found");
+  if(!user.isActive) throw new Error("Account is temporarily locked");
+  
+  const session = await AuthRepository.findTokenBySession(sessionId);
+  
+  if (!session) throw new Error("Session not found");
+
+  if (session.revoked) throw new Error("This session has been revoked");
+  
+  const userInfo = await UsersRepository.getUserProfile(userId);
+  
+  return {
+    id: userInfo.id,
+    firstName: userInfo.firstName,
+    lastName: userInfo.lastName,
+    email: userInfo.email,
+    phone: userInfo.phone,
+    role: userInfo.role,
+    isActive: userInfo.isActive,
+    avatarUrl: userInfo.avatar,
+    createdAt: userInfo.createdAt,
+    updatedAt: userInfo.updatedAt,
+  };
+};
+
+// UPDATE
+const updateUserProfile = async ({
+  userId,
+  bodyData,
+  avatarBuffer,
+}) => {
+
+  const { firstName, lastName, phone } = bodyData;
+
+  if (!userId) {
+    throw new Error("User id not found");
+  }
+
+  const user = await AuthRepository.findUserById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  let avatarUrl = user.avatarBuffer;
+  let avatarPublicId = user.avatarPublicId;
+
+  if (avatarBuffer) {
+    const uploaded = await uploadToCloudinary(
+      avatarBuffer,
+      `profiles/${userId}`
+    );
+    if (user.avatarPublicId) {
+      await deleteFromCloudinary(user.avatarPublicId);
+    }
+    avatarUrl = uploaded.secure_url;
+    avatarPublicId = uploaded.public_id;
+  }
+  
+  const updateData = {};
+
+  if (firstName !== undefined)
+    updateData.firstName = firstName;
+  
+  if (lastName !== undefined)
+    updateData.lastName = lastName;
+  
+  if (avatarUrl !== undefined)
+    updateData.avatarUrl = avatarUrl;
+  
+  if (avatarPublicId !== undefined)
+    updateData.avatarPublicId = avatarPublicId;
+    
+  if (phone !== undefined)
+    updateData.phone = phone;
+
+  const result = await UsersRepository.updateUserProfile({
+    updateData,
+    userId
+  });
+ 
+  return result;
+};
 
 // SAVE EXPO TOKEN 
 export const savePushToken = async ({
@@ -29,4 +122,6 @@ export const savePushToken = async ({
 
 export const UsersService = {
   savePushToken,
+  getUserProfile,
+  updateUserProfile,
 };

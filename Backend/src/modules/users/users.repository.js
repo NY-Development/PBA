@@ -1,6 +1,45 @@
-import { } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { expoTokens } from "../../db/schema/expoTokens.js";
+import { users } from "../../db/schema/users.js";
+
+const safeUser = {
+  id: users.id,
+  firstName: users.firstName,
+  lastName: users.lastName,
+  email: users.email,
+  phone: users.phone,
+  role: users.role,
+  isActive: users.isActive,
+  avatarUrl: users.avatarUrl,
+  createdAt: users.createdAt,
+  updatedAt: users.updatedAt,
+};
+
+// USER PROFILE 
+const getUserProfile = async(userId) => {
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId));
+  
+  return result[0];
+};
+
+// UPDATE USER PROFILE 
+const updateUserProfile = async ({
+  userId,
+  updateData,
+}) => {
+
+  const result = await db
+    .update(users)
+    .set(updateData)
+    .where(eq(users.id, userId))
+    .returning(safeUser);
+ 
+  return result[0] || null;
+};
 
 // SAVE EXPO TOKEN
 const savePushToken = async({
@@ -20,4 +59,6 @@ const savePushToken = async({
 
 export const UsersRepository = {
   savePushToken,
-}
+  getUserProfile,
+  updateUserProfile,
+};

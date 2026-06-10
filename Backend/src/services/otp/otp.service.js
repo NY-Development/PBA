@@ -14,6 +14,9 @@ const createOTP = async ({
   email,
   otp,
   type,
+  firstName,
+  lastName,
+  password,
 }) => {
 
   const result = await db
@@ -22,6 +25,9 @@ const createOTP = async ({
       email,
       otp,
       type,
+      firstName,
+      lastName,
+      password,
       expiresAt: new Date(
         Date.now() + 10 * 60 * 1000
       ),

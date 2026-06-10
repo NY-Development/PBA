@@ -13,10 +13,7 @@ const register = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error(
-      "Error registering user:",
-      error
-    );
+    logger.error(`Error registering user: ${error.message}`);
 
     return res.status(400).json({
       message: error.message,
@@ -42,16 +39,13 @@ const verifyEmail = async (req, res) => {
 
     return res.status(201).json({
       message:
-        "Email verified successfully",
+        "Email verified, user registered successfully",
       user,
       accessToken,
     });
 
   } catch (error) {
-    logger.error(
-      "Verify email error:",
-      error.message
-    );
+    logger.error(`Email verification error: ${error.message}`);
 
     return res.status(400).json({
       message: error.message,
@@ -77,7 +71,7 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("Login error:", error.message);
+    logger.error(`Login error: ${error.message}`);
 
     return res.status(401).json({
       message: error.message
@@ -93,12 +87,12 @@ const logout = async(req, res) => {
     await Cookie.clearRefreshToken(res);
   
     return res.status(200).json({
-      message: "Logged out successfully"
+      message: "Logged out/revoked successfully"
     });
-  }catch(err){
-    logger.error("Logout error:", err.message);
+  }catch(error){
+    logger.error(`Logout error: ${error.message}`);
     return res.status(500).json({
-      message: err.message || "server error"
+      message: error.message || "server error"
     });
   }
 };
@@ -106,19 +100,17 @@ const logout = async(req, res) => {
 // LOGOUT ALL
 const logoutAll = async(req, res) => {
   try{
-    await AuthService.logoutAll({
-      userId: req.user.userId
-    });
+    await AuthService.logoutAll(req.user);
     
     await Cookie.clearRefreshToken(res);
   
     return res.status(200).json({
-      message: "All sessions deleted successfully"
+      message: "All sessions revoked successfully"
     });
-  }catch(err){
-    logger.error("Error logging all out:", err.message);
+  }catch(error){
+    logger.error(`Logout all error: ${error.message}`);
     return res.status(500).json({
-      message: err.message || "server error"
+      message: error.message || "server error"
     });
   }
 };
@@ -126,18 +118,18 @@ const logoutAll = async(req, res) => {
 // GET ME
 const getMe = async (req, res) => {
   try {
-    const user = await AuthService.getMe(req.user.userId);
+    const user = await AuthService.getMe(req.user);
     
     return res.status(200).json({
       authenticated: true,
       user
     });
 
-  } catch (err) {
-    logger.error("Get user error:", err.message);
+  } catch (error) {
+    logger.error(`Get me error: ${error.message}`);
 
     return res.status(500).json({
-      message: err.message
+      message: error.message
     });
   }
 };
@@ -146,41 +138,22 @@ const getMe = async (req, res) => {
 const refresh = async (req, res) => {
   try {
     const { newAccessToken } = 
-      await AuthService.refresh(req.cookies.refreshToken, req.user);
+      await AuthService.refresh({
+        oldRefreshToken: req.cookies.refreshToken, 
+        userId: req.user.userId,
+        session_id: req.user.session_id,
+      });
     
     return res.status(200).json({
       message: "Token refreshed successfully",
       newAccessToken
     });
 
-  } catch (err) {
-    logger.error("Refresh error:", err.message);
+  } catch (error) {
+    logger.error(`Refresh error: ${error.message}`);
 
     return res.status(500).json({
-      message: err.message
-    });
-  }
-};
-
-// UPDATE 
-const update = async (req, res) => {
-  try {
-    const updatedUser = await AuthService.updateUser({
-      bodyData: req.body,
-      userId: req.user.userId,
-      avatar_buffer: req.file?.buffer,
-    });
-
-    return res.status(200).json({
-      message: "User updated successfully",
-      user: updatedUser
-    });
-
-  } catch (error) {
-    logger.error("Update user error:", error.message);
-
-    return res.status(400).json({
-      message: error.message || "Failed to update user"
+      message: error.message
     });
   }
 };
@@ -194,10 +167,10 @@ const forgotPassword = async(req, res) => {
       message: "Password reset code sent to your email"
     });
     
-  }catch(err){
-    logger.error("Password reset error:", err.message);
+  }catch(error){
+    logger.error(`Pwd reset error: ${error.message}`);
     res.status(500).json({
-      message: err.message
+      message: error.message
     });
   }
 };
@@ -210,10 +183,10 @@ const resetPassword = async(req, res) => {
     res.status(200).json({
       message: "Password reset successfully"
     });
-  }catch(err){
-    logger.error("Password reset failed:", err.message);
+  }catch(error){
+    logger.error(`pwd reset error: ${error.message}`);
     res.status(500).json({
-      message: err.message
+      message: error.message
     });
   }
 };
@@ -226,10 +199,10 @@ const resendOTP = async(req, res) => {
     res.status(200).json({
       message: "OTP sent to your email"
     });
-  }catch(err){
-    logger.error("Resending OTP error:", err.message);
+  }catch(error){
+    logger.error(`otp resend error: ${error.message}`);
     res.status(500).json({
-      message: err.message
+      message: error.message
     });
   }
 };
@@ -242,11 +215,10 @@ export const AuthController = {
   login,
   logout,
   refresh,
-  update,
   getMe,
   verifyEmail,
   forgotPassword,
   resetPassword,
   resendOTP,
   logoutAll,
-}
+};
