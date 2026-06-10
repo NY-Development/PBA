@@ -33,14 +33,17 @@ const updateUserProfile = async (req, res) => {
       user: updated
     });
 
-  } catch (error) {
-    logger.error(`Profile update error: ${error.message}`);
+  } catch (err) {
+    logger.error(`Profile update error: ${err.message}`);
 
     return res.status(400).json({
-      message: error.message || "Failed to update user"
+      message: err.message || "Failed to update user"
     });
   }
 };
+
+// UPLOAD AVATAR
+
 
 // SAVE EXPO TOKEN 
 const savePushToken = async(req, res) => {

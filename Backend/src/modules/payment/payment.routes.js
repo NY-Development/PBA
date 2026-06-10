@@ -1,14 +1,26 @@
 import { Router } from "express";
-
-import { protect, authorize } from "../../middlewares/auth.middleware.js";
-import { validate } from "../../middlewares/validation.middleware.js";
+import { protect } from "../../middlewares/auth.middleware.js";
 import { upload } from "../../middlewares/upload.middleware.js";
-import { PaymentController } from "./payment.controller.js"
-
+import { PaymentController } from "./payment.controller.js";
 
 const router = Router();
 
-router.post("/verify-cbe", protect, PaymentController.verifyCBE);
-router.post("/verify-telebirr", protect, PaymentController.verifyTelebirr);
+router.post(
+  "/verify-cbe",
+  protect,
+  PaymentController.verifyCBE
+);
 
-export default router;
+router.post(
+  "/verify-telebirr",
+  protect,
+  PaymentController.verifyTelebirr
+);
+
+router.post(
+  "/verify-screenshot",
+  upload.single("file"),
+  PaymentController.verifyScreenshot
+);
+
+export default router; 

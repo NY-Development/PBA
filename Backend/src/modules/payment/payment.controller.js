@@ -43,8 +43,41 @@ const verifyTelebirr = async(req, res) => {
   }
 };
 
+// SCREENSHOT VERIFY
+const verifyScreenshot = async (req, res) => {
+  try {
+    const file = req.file;
+    const data = await PaymentService.verifyScreenshot({
+      file,
+      suffix: req.body.suffix,
+    });
+
+    return res.status(200).json(data);
+
+  } catch (err) {
+  console.log("FULL API ERROR:", err.response?.data);
+
+  logger.error(
+    `Error verifying screenshot: ${
+      err.response?.data?.error ||
+      err.response?.data?.message ||
+      err.message
+    }`
+  );
+
+  return res.status(err.response?.status || 500).json({
+    success: false,
+    message:
+      err.response?.data?.error ||
+      err.response?.data?.message ||
+      err.message,
+  });
+}
+};
+
 
 export const PaymentController = {
   verifyCBE,
-  verifyTelebirr
+  verifyTelebirr,
+  verifyScreenshot,
 };

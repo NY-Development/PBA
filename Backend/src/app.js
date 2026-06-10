@@ -45,6 +45,15 @@ app.use('/api/', limiter);
 // API Routes
 app.use("/api/v1", routes);
 
+app.use((err, req, res, next) => {
+  console.log("GLOBAL ERROR:");
+  console.log(err);
+
+  return res.status(500).json({
+    message: err.message,
+  });
+});
+
 // Health Check
 app.use('/', (req, res) => {
   res.send(indexTemplate());

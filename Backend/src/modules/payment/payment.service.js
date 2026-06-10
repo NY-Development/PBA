@@ -1,9 +1,8 @@
 import axios from "axios";
+import FormData from "form-data";
 import { Env } from "../../configs/env.js";
-import { AuthRepository } from "../auth/auth.repository.js"
-import { 
-  sendEmail
-} from "../../services/email/email.service.js";
+import { AuthRepository } from "../auth/auth.repository.js";
+import { sendEmail } from "../../services/email/email.service.js";
 import { baseEmailTemplate } from "../../templates/email.template.js";
 
 
@@ -102,9 +101,56 @@ const verifyTelebirr = async({
   return response.data;
 };
 
+const verifyScreenshot = async ({
+  file, 
+  suffix
+}) => {
+  if (!file) throw new Error("File is required");
+  if (!suffix) throw new Error("Suffix is required");
+
+  const form = new FormData();
+
+  form.append("file", file.buffer, {
+    filename: file.originalname,
+  });
+
+  form.append("autoVerify", "true");
+
+  const response = await axios.post(
+    "https://verifyapi.leulzenebe.pro/verify-image",
+    form,
+    {
+      headers: {
+        ...form.getHeaders(),
+        "x-api-key": Env.PAYMENT_API_KEY,
+      },
+    }
+  );
+  
+  const accountSuffix =
+    response.data.forward_to === "/verify-cbe"
+      ? suffix
+      : {};
+  
+  const result = await axios.post(
+      `https://verifyapi.leulzenebe.pro${response.data.forward_to}`,
+      {
+        reference: response.data.reference,
+        accountSuffix
+      },
+      {
+         headers: {
+            "x-api-key": `${Env.PAYMENT_API_KEY}`
+         }
+      }
+   );
+
+  return result.data;
+};
 
 
 export const PaymentService = {
   verifyCBE,
-  verifyTelebirr
+  verifyTelebirr,
+  verifyScreenshot,
 };
