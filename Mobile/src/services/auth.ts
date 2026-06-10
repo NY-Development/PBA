@@ -37,17 +37,17 @@ export const authService = {
       email: data.identity,
       password: data.password,
     };
-    const response = await api.post<AuthResponse>('/auth/login', payload);
+    const response = await api.post<AuthResponse>('auth/login', payload);
     return response.data;
   },
 
   register: async (data: SignUpInput): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/register', data);
+    const response = await api.post<AuthResponse>('auth/register', data);
     return response.data;
   },
 
   logout: async (): Promise<GenericResponse> => {
-    const response = await api.post<GenericResponse>('/auth/logout');
+    const response = await api.post<GenericResponse>('auth/logout');
     return response.data;
   },
 
@@ -56,7 +56,7 @@ export const authService = {
   // ==========================================
 
   getMe: async (): Promise<{ authenticated: boolean; user: UserProfile }> => {
-    const response = await api.get<{ authenticated: boolean; user: UserProfile }>('/auth/me');
+    const response = await api.get<{ authenticated: boolean; user: UserProfile }>('auth/me');
     return response.data;
   },
 
@@ -65,13 +65,13 @@ export const authService = {
     last_name?: string;
     avatar_url?: string;
   }): Promise<{ message: string; user: UserProfile }> => {
-    const response = await api.patch<{ message: string; user: UserProfile }>('/auth/update', data);
+    const response = await api.patch<{ message: string; user: UserProfile }>('auth/update', data);
     return response.data;
   },
 
   updateProfilePicture: async (formData: FormData): Promise<{ message: string; updatedUser: UserProfile }> => {
     const response = await api.post<{ message: string; updatedUser: UserProfile }>(
-      '/auth/profile-picture',
+      'auth/profile-picture',
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } }
     );
@@ -84,7 +84,7 @@ export const authService = {
 
   sendRecoveryCode: async (data: RecoveryInput): Promise<GenericResponse> => {
     const payload = { email: data.identity };
-    const response = await api.post<GenericResponse>('/auth/forgot-password', payload);
+    const response = await api.post<GenericResponse>('auth/forgot-password', payload);
     return response.data;
   },
 
@@ -92,7 +92,7 @@ export const authService = {
     data: OtpVerifyInput & { identity: string }
   ): Promise<GenericResponse> => {
     const payload = { email: data.identity, otp: data.code };
-    const response = await api.post<GenericResponse>('/auth/verify-email', payload);
+    const response = await api.post<GenericResponse>('auth/verify-email', payload);
     return response.data;
   },
 
@@ -101,7 +101,7 @@ export const authService = {
     otp: string;
     password: string;
   }): Promise<GenericResponse> => {
-    const response = await api.post<GenericResponse>('/auth/reset-password', data);
+    const response = await api.post<GenericResponse>('auth/reset-password', data);
     return response.data;
   },
 
@@ -109,7 +109,7 @@ export const authService = {
     email: string;
     type: 'register' | 'reset';
   }): Promise<GenericResponse> => {
-    const response = await api.post<GenericResponse>('/auth/resend-otp', data);
+    const response = await api.post<GenericResponse>('auth/resend-otp', data);
     return response.data;
   },
 };
