@@ -17,8 +17,8 @@ import { signUpSchema } from '@/src/types/validation/auth.schema';
 export function SignUpRoleSelector() {
   const router = useRouter();
   const [role, setRole] = useState<'buyer' | 'maker'>('buyer');
-  const [first_name, setFirstName] = useState('');
-  const [last_name, setLastName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +31,7 @@ export function SignUpRoleSelector() {
       // Safely fires after useAuthStore updates tokens globally
       router.push({
         pathname: '/(auth)/otp-verify',
-        params: { identity: `+251${phone}` }
+        params: { identity: email }
       });
     },
     onError: (error) => {
@@ -44,8 +44,8 @@ export function SignUpRoleSelector() {
     try {
       const validData = signUpSchema.parse({
         role,
-        first_name,
-        last_name,
+        firstName,
+        lastName,
         phone: `+251${phone}`, // Structural structural match for Ethiopian phone criteria
         email,
         password,
@@ -156,30 +156,30 @@ export function SignUpRoleSelector() {
               <View className="flex-1 gap-1.5">
                 <Text className="text-foreground text-sm font-semibold">First Name</Text>
                 <CustomInput
-                  value={first_name}
+                  value={firstName}
                   onChangeText={(text) => {
                     setFirstName(text);
-                    if (errors.first_name) setErrors({ ...errors, first_name: '' });
+                    if (errors.firstName) setErrors({ ...errors, firstName: '' });
                   }}
                   placeholder="Abebe"
-                  containerClassName={errors.first_name ? 'border-destructive' : ''}
+                  containerClassName={errors.firstName ? 'border-destructive' : ''}
                   leftIcon={<User size={18} className="text-muted-foreground" />}
                 />
-                {errors.first_name && <Text className="text-destructive text-xs ml-1">{errors.first_name}</Text>}
+                {errors.firstName && <Text className="text-destructive text-xs ml-1">{errors.firstName}</Text>}
               </View>
 
               <View className="flex-1 gap-1.5">
                 <Text className="text-foreground text-sm font-semibold">Last Name</Text>
                 <CustomInput
-                  value={last_name}
+                  value={lastName}
                   onChangeText={(text) => {
                     setLastName(text);
-                    if (errors.last_name) setErrors({ ...errors, last_name: '' });
+                    if (errors.lastName) setErrors({ ...errors, lastName: '' });
                   }}
                   placeholder="Bikila"
-                  containerClassName={errors.last_name ? 'border-destructive' : ''}
+                  containerClassName={errors.lastName ? 'border-destructive' : ''}
                 />
-                {errors.last_name && <Text className="text-destructive text-xs ml-1">{errors.last_name}</Text>}
+                {errors.lastName && <Text className="text-destructive text-xs ml-1">{errors.lastName}</Text>}
               </View>
             </View>
 

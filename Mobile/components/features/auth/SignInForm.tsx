@@ -38,7 +38,7 @@ export function SignInForm() {
 
   const { mutate: login, isPending } = useLoginMutation({
     onSuccess: () => {
-      router.replace('/(auth)/home');
+      router.replace('/(main)/home');
     },
     onError: (error) => {
       setErrors({ form: error.response?.data?.message || 'Login failed. Please try again.' });

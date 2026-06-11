@@ -24,7 +24,7 @@ export {
   ErrorBoundary,
 } from 'expo-router';
 
-export const stabilityConfig = {
+export const unstable_settings = {
   initialRouteName: 'splash',
 };
 
@@ -33,31 +33,52 @@ export default function RootLayout() {
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const { isAuthenticated } = useAuthStore();
   const pathname = usePathname();
-  const segments = useSegments();
+  const segments = useSegments() as string[];
   const [authBootstrapped, setAuthBootstrapped] = useState(false);
+  
+  const currentGroup = segments[0] || '';
+  
+  // Public routes allowed without authentication
+  const isPublicRoute = 
+    currentGroup === '(auth)' || 
+    currentGroup === 'splash' || 
+    currentGroup === '' ||
+    currentGroup === 'index' ||
+    currentGroup === 'modals';
 
-  const currentGroup = (segments?.[0] as string) || '';
-  const isProtectedGroup =
-    currentGroup === '(main)' ||
-    currentGroup === '(seller)';
-
-  // Protected route guard: if no token, send user to login (except public routes).
+  // Navigation Guard: Primary Protection Engine
   useEffect(() => {
     if (!authBootstrapped) return;
-    if (!isAuthenticated && isProtectedGroup) {
-      AsyncStorage.setItem('lastRoute', pathname || '/(auth)/landing').catch(() => {});
+
+    // 1. Guard for protected screens (if not logged in, go to sign-in)
+    if (!isAuthenticated && !isPublicRoute) {
+      AsyncStorage.setItem('redirect_to', pathname || '/(main)/home').catch(() => {});
       router.replace('/(auth)/sign-in');
+      return;
     }
-  }, [authBootstrapped, isAuthenticated, isProtectedGroup, pathname, router]);
+
+    // 2. Role-based redirection for authenticated users on auth screens
+    if (isAuthenticated && currentGroup === '(auth)') {
+      const user = useAuthStore.getState().user;
+      const role = user?.role;
+      
+      if (role === 'maker' || role === 'seller') {
+        router.replace('/(seller)/home');
+      } else {
+        router.replace('/(main)/home');
+      }
+      return;
+    }
+  }, [authBootstrapped, isAuthenticated, isPublicRoute, currentGroup, router]);
 
   // Persist last visited route (so splash can "resume" on reload).
   useEffect(() => {
     if (!authBootstrapped) return;
     if (!isAuthenticated) return;
     if (!pathname) return;
-    if (!isProtectedGroup) return;
+    if (isPublicRoute) return;
     AsyncStorage.setItem('lastRoute', pathname).catch(() => {});
-  }, [authBootstrapped, isAuthenticated, pathname, isProtectedGroup]);
+  }, [authBootstrapped, isAuthenticated, pathname, isPublicRoute]);
 
   useEffect(() => {
     (async () => {

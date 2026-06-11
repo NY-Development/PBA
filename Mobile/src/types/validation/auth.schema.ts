@@ -24,8 +24,8 @@ export const signInSchema = z.object({
 });
 
 export const signUpSchema = z.object({
-  first_name: z.string().min(2, 'First name must be at least 2 characters long'),
-  last_name: z.string().min(2, 'Last name must be at least 2 characters long'),
+  firstName: z.string().min(2, 'First name must be at least 2 characters long'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters long'),
   phone: z
     .string()
     .regex(

@@ -2,10 +2,11 @@ import { create } from 'zustand';
 
 interface UserProfile {
   id: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
+  role?: 'buyer' | 'maker' | 'customer' | 'seller';
 }
 
 interface AuthState {

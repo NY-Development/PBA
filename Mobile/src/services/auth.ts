@@ -8,8 +8,8 @@ import {
 
 export interface UserProfile {
   id: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   role?: string;
@@ -61,8 +61,8 @@ export const authService = {
   },
 
   updateProfile: async (data: {
-    first_name?: string;
-    last_name?: string;
+    firstName?: string;
+    lastName?: string;
     avatar_url?: string;
   }): Promise<{ message: string; user: UserProfile }> => {
     const response = await api.patch<{ message: string; user: UserProfile }>('auth/update', data);

@@ -94,7 +94,7 @@ export const useMeQuery = (
 // UPDATE PROFILE
 // ==========================================
 export const useUpdateProfileMutation = (
-  options?: Omit<UseMutationOptions<{ message: string; user: UserProfile }, ApiError, { first_name?: string; last_name?: string; avatar_url?: string }>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<{ message: string; user: UserProfile }, ApiError, { firstName?: string; lastName?: string; avatar_url?: string }>, 'mutationFn'>
 ) => {
   return useMutation({
     ...options,

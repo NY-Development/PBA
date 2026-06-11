@@ -10,8 +10,10 @@ export default function SellerLayout() {
         animation: 'slide_from_right',
       }}
     >
+      <Stack.Screen name="home" />
       <Stack.Screen name="dashboard" />
       <Stack.Screen name="orders" />
+      <Stack.Screen name="registration" />
     </Stack>
   );
 }

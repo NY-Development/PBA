@@ -124,7 +124,7 @@ api.interceptors.response.use(
     // Deep-Diagnostic Switchboard for Network Errors
     if (__DEV__) {
       console.log('\n============= 🚨 [API NETWORK ERROR DIAGNOSTIC] =============');
-      console.log(`📡 Requested URL:   ${error.config?.method?.toUpperCase()} -> ${error.config?.baseURL}/${error.config?.url}`);
+      console.log(`📡 Requested URL:   ${error.config?.method?.toUpperCase()} -> ${error.config?.baseURL}${error.config?.url}`);
       console.log(`✉️  Sent Headers:    `, JSON.stringify(error.config?.headers, null, 2));
       
       if (error.response) {
