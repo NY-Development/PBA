@@ -4,6 +4,7 @@ import { seedAddresses } from "./addresses.js";
 import { seedVendors } from "./vendors.js";
 import { seedCategories } from "./categories.js";
 import { seedNotifications } from "./notifications.js";
+import { seedOrders } from "./orders.js";
 
 
 const seed = async () => {
@@ -23,6 +24,9 @@ const seed = async () => {
     
     const notifications = await seedNotifications(users);
     logger.info(`✅ Seeded ${notifications.length} notifications`);
+    
+    const orders = await seedOrders();
+    logger.info(`✅ Seeded ${orders.length} orders`);
 
   } catch (err) {
     logger.error(err.cause || err.message);
