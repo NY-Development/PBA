@@ -3,13 +3,14 @@ import logger from "../../utils/logger.js";
 import { db } from "../index.js";
 import { refreshTokens } from "../schema/refreshTokens.js";
 import { users } from "../schema/users.js";
+import { Env } from "../../configs/env.js";
 
 
 export const seedRefreshTokens = async() => {
   try{
     const allUsers = await db.select().from(users);
     
-    const data = Array.from({ length: 50 }, () => {
+    const data = Array.from({ length: Env.SEED_REFRESH_TOKENS }, () => {
       const user = faker.helpers.arrayElement(allUsers);
       
       return {

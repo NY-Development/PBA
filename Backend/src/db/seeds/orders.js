@@ -4,13 +4,14 @@ import { db } from "../index.js";
 import { addresses } from "../schema/addresses.js";
 import { users } from "../schema/users.js";
 import { orders } from "../schema/orders.js";
+import { Env } from "../../configs/env.js";
 
 export const seedOrders = async() => {
   try{
       const allAddresses = await db.select().from(addresses);
       const allUsers = await db.select().from(users);
       
-      const data = Array.from({ length: 200 }, () => {
+      const data = Array.from({ length: Env.SEED_ORDERS }, () => {
         const address = faker.helpers.arrayElement(allAddresses);
         const user = faker.helpers.arrayElement(allUsers);
       

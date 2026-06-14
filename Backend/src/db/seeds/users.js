@@ -1,11 +1,12 @@
 import { faker } from "@faker-js/faker";
 import logger from "../../utils/logger.js";
 import { db } from "../index.js";
-import { users } from "../schema/users.js";
+import { users } from "../schema/users.js";import { Env } from "../../configs/env.js";
+
 
 export const seedUsers = async() => {
   try{
-    const data = Array.from({ length: 100 }, () => ({
+    const data = Array.from({ length: Env.SEED_USERS }, () => ({
       email: faker.internet.email().toLowerCase(),
       password: "$2b$10$abcdefghijklmnopqrstuv",
       role: faker.helpers.arrayElement([

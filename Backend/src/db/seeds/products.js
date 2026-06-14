@@ -4,13 +4,14 @@ import { db } from "../index.js";
 import { categories } from "../schema/categories.js";
 import { vendors } from "../schema/vendors.js";
 import { products } from "../schema/products.js";
+import { Env } from "../../configs/env.js";
 
 export const seedProducts = async() => {
   try{
     const allCategories = await db.select().from(categories);
     const allVendors = await db.select().from(vendors);
     
-    const data = Array.from({ length: 200 }, () => {
+    const data = Array.from({ length: Env.SEED_PRODUCTS }, () => {
       const category = faker.helpers.arrayElement(allCategories);
       const vendor = faker.helpers.arrayElement(allVendors);
       

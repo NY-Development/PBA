@@ -4,6 +4,7 @@ import { db } from "../index.js";
 import { reviews } from "../schema/reviews.js";
 import { users } from "../schema/users.js";
 import { products } from "../schema/products.js";
+import { Env } from "../../configs/env.js";
 
 
 export const seedReviews = async() => {
@@ -11,7 +12,7 @@ export const seedReviews = async() => {
     const allUsers = await db.select().from(users);
     const allProducts = await db.select().from(products);
     
-    const data = Array.from({ length: 50 }, () => {
+    const data = Array.from({ length: Env.SEED_REVIEWS }, () => {
       const user = faker.helpers.arrayElement(allUsers);
       const product = faker.helpers.arrayElement(allProducts);
       

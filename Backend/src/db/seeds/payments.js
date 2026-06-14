@@ -5,6 +5,7 @@ import { orders } from "../schema/orders.js";
 import { vendors } from "../schema/vendors.js";
 import { users } from "../schema/users.js";
 import { payments } from "../schema/payments.js";
+import { Env } from "../../configs/env.js";
 
 
 export const seedPayments = async() => {
@@ -13,7 +14,7 @@ export const seedPayments = async() => {
     const allUsers = await db.select().from(users);
     const allOrders = await db.select().from(orders);
     
-    const data = Array.from({ length: 200 }, () => {
+    const data = Array.from({ length: Env.SEED_PAYMENTS }, () => {
       const user = faker.helpers.arrayElement(allUsers);
       const vendor = faker.helpers.arrayElement(allVendors);
       const order = faker.helpers.arrayElement(allOrders);

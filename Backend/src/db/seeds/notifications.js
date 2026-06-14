@@ -3,13 +3,14 @@ import logger from "../../utils/logger.js";
 import { db } from "../index.js";
 import { notifications } from "../schema/notifications.js";
 import { users } from "../schema/users.js";
+import { Env } from "../../configs/env.js";
 
 
 export const seedNotifications = async() => {
   try{
     const allUsers = await db.select().from(users);
     
-    const data = Array.from({ length: 50 }, () => {
+    const data = Array.from({ length: Env.SEED_NOTIFICATIONS }, () => {
       const user = faker.helpers.arrayElement(allUsers);
       
       return {
