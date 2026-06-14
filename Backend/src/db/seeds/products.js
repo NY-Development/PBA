@@ -1,19 +1,22 @@
 import { faker } from "@faker-js/faker";
 import logger from "../../utils/logger.js";
 import { db } from "../index.js";
-import { addresses } from "../schema/addresses.js";
+import { products } from "../schema/products.js";
 
-export const seedAddresses = async(users) => {
-  const data = users.map((user) => ({
-    userId: user.id,
-    label: faker.helpers.arrayElement([
-      "work",
-      "home",
-    ]),
-    street: faker.location.streetAddress(),
+export const seedProducts = async(vendors) => {
+  const data = vendors.map((vendor) => ({
+    vendorId: user.id,
+    storeName: faker.company.name(),
+    description: faker.company.catchPhrase(),
+    logoUrl: faker.image.url(),
+    bannerUrl: faker.image.url(),
+    status: faker.helpers.arrayElement(['pending', 'active', 'inactive', 'suspended', 'rejected']),
+    tinNumber: faker.string.numeric(10),
+    logoPublicId: faker.string.uuid(),
+    bannerPublicId: faker.string.uuid(),
   }));
   
-  await db.delete(addresses);
+  await db.delete(products);
 
-  return await db.insert(addresses).values(data).returning();
+  return await db.insert(products).values(data).returning();
 };
