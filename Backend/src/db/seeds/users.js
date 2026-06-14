@@ -21,6 +21,8 @@ export const seedUsers = async() => {
     avatarUrl: faker.image.avatar(),
     avatarPublicId: faker.string.uuid(),
   }));
+  
+  await db.delete(users); 
 
   return await db.insert(users).values(data).returning();
 };
