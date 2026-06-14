@@ -40,7 +40,7 @@ export const signUpSchema = z.object({
       passwordRegex,
       'Password must contain at least one number and one special character'
     ),
-  role: z.enum(['buyer', 'maker']),
+  role: z.enum(['customer', 'buyer', 'maker', 'vendor', 'seller']),
   agreeTerms: z.literal(true, {
     message: 'You must agree to the terms and conditions',
   }),

@@ -14,6 +14,7 @@ import { CustomButton } from '@/components/common/CustomButton';
 import { useSignUpMutation } from '@/src/hooks/auth/useAuthMutation';
 import { signUpSchema } from '@/src/types/validation/auth.schema';
 
+
 export function SignUpRoleSelector() {
   const router = useRouter();
   const [role, setRole] = useState<'buyer' | 'maker'>('buyer');
@@ -27,8 +28,8 @@ export function SignUpRoleSelector() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { mutate: signUp, isPending } = useSignUpMutation({
-    onSuccess: () => {
-      // Safely fires after useAuthStore updates tokens globally
+    onSuccess: (data) => {
+      // Safely fires after registration - user now goes to OTP verification
       router.push({
         pathname: '/(auth)/otp-verify',
         params: { identity: email }

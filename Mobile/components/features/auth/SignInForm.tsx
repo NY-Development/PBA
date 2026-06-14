@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Pressable, Image } from 'react-native';
+import { View, Pressable, Image, ToastAndroid, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Languages, Mail, Eye, EyeOff, Fingerprint } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
@@ -14,6 +14,7 @@ import { CustomButton } from '@/components/common/CustomButton';
 import { useLoginMutation } from '@/src/hooks/auth/useAuthMutation';
 import { signInSchema } from '@/src/types/validation/auth.schema';
 import { biometricService } from '@/src/utils/biometrics';
+import { useAuthStore } from '@/src/stores/useAuthStore';
 
 export function SignInForm() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export function SignInForm() {
   const [secureText, setSecureText] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasBiometricSetup, setHasBiometricSetup] = useState(false);
+  const {user, firstTime, setFirstTime} = useAuthStore();
 
   // Check if biometrics are actively setup on device mount
   useEffect(() => {
@@ -38,7 +40,26 @@ export function SignInForm() {
 
   const { mutate: login, isPending } = useLoginMutation({
     onSuccess: () => {
-      router.replace('/(main)/home');
+      if(user?.role === 'customer'){
+        if(firstTime){
+          setFirstTime(false);
+          router.replace('/(main)/intro');
+        }else{
+          router.replace('/(main)/home');
+        }
+      }else if(user?.role === 'seller' || user?.role === 'maker' || user?.role === 'vendor'){
+        if(firstTime){
+          setFirstTime(false);
+          router.replace('/(seller)/registration');
+        }else{
+          router.replace('/(seller)/home');
+        }
+      }
+      if(Platform.OS === 'android'){
+        ToastAndroid.showWithGravityAndOffset("Login Successful", ToastAndroid.SHORT, ToastAndroid.TOP, 4,4);
+      }else{
+        Alert.alert("Login Successful");
+      }
     },
     onError: (error) => {
       setErrors({ form: error.response?.data?.message || 'Login failed. Please try again.' });

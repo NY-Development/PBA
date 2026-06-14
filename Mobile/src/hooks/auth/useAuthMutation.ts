@@ -26,7 +26,7 @@ export const useLoginMutation = (
     mutationFn: authService.login,
     onSuccess: (...args) => {
       const [data] = args;
-      setAuth(data.user, data.accessToken, data.refreshToken);
+      setAuth(data.user as any, data.accessToken, data.refreshToken);
 
       if (options?.onSuccess) {
         options.onSuccess(...args);
@@ -41,15 +41,10 @@ export const useLoginMutation = (
 export const useSignUpMutation = (
   options?: Omit<UseMutationOptions<AuthResponse, ApiError, SignUpInput>, 'mutationFn'>
 ) => {
-  const setAuth = useAuthStore((state) => state.setAuth);
-
   return useMutation({
     ...options,
     mutationFn: authService.register,
     onSuccess: (...args) => {
-      const [data] = args;
-      setAuth(data.user, data.accessToken, data.refreshToken);
-
       if (options?.onSuccess) {
         options.onSuccess(...args);
       }

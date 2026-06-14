@@ -1,6 +1,5 @@
-// app/(auth)/otp-verify.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Pressable, TextInput } from 'react-native';
+import { View, Pressable, TextInput, ToastAndroid, Platform, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, MessageSquare } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
@@ -28,7 +27,12 @@ export default function OtpVerifyScreen() {
 
   const { mutate: verifyOtp, isPending: isVerifying } = useOtpVerifyMutation({
     onSuccess: () => {
-      router.replace('/(main)/home');
+      router.replace('/(auth)/sign-in');
+      if(Platform.OS === 'android'){
+        ToastAndroid.showWithGravityAndOffset("OTP Verified Successfully: Please Login to access dashboard.", ToastAndroid.SHORT, ToastAndroid.TOP, 4,4);
+      }else{
+        Alert.alert("OTP Verified Successfully: Please Login to access dashboard.");
+      }
     },
     onError: (error) => {
       setErrors({ form: error.response?.data?.message || 'Invalid verification code.' });

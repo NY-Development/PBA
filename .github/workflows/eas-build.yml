@@ -1,0 +1,64 @@
+name: Expo EAS Build
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Mobile/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Mobile/**'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS Build Profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+
+jobs:
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: Mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Mobile
+        run: npm ci
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Determine Profile
+        id: profile
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "profile=${{ github.event.inputs.profile }}" >> $GITHUB_OUTPUT
+          else
+            # Default to preview for push/PR to main, unless EAS_PROFILE variable is set
+            echo "profile=${{ vars.EAS_PROFILE || 'preview' }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build with EAS
+        working-directory: Mobile
+        run: eas build --platform all --profile ${{ steps.profile.outputs.profile }} --non-interactive

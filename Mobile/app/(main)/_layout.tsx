@@ -12,6 +12,7 @@ export default function MainLayout() {
     >
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="home" />
+      <Stack.Screen name="intro" />
     </Stack>
   );
 }

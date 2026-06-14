@@ -14,6 +14,8 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  firstTime : boolean;
+  setFirstTime : (firstTime : boolean) => void;
   setAuth: (user: UserProfile, accessToken: string, refreshToken: string) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
@@ -24,6 +26,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  firstTime : true,
+
+  setFirstTime : (firstTime : boolean) => set({ firstTime }),
 
   setAuth: (user, accessToken, refreshToken) =>
     set({ user, accessToken, refreshToken, isAuthenticated: true }),

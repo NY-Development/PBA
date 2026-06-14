@@ -7,13 +7,15 @@ import { useRouter } from 'expo-router';
 
 export default function MainHomeScreen() {
 
-  const {logout} = useAuthStore();
+  const {logout, user} = useAuthStore();
   const router = useRouter();
 
   const handleLogout = () => {
     logout();
     router.replace('/(auth)/sign-in');
-  }
+  };
+
+  console.log("User Role is : ", user?.role);
 
   return (
     <View className="flex-1 bg-background items-center justify-center">
