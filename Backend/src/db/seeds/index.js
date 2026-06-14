@@ -9,6 +9,7 @@ import { seedOrders } from "./orders.js";
 import { seedProducts } from "./products.js";
 import { seedCartItems } from "./cartItems.js";
 import { seedOrderItems } from "./orderItems.js";
+import { seedPayments } from "./payments.js";
 
 
 const seed = async () => {
@@ -36,6 +37,9 @@ const seed = async () => {
     
     const orders = await seedOrders();
     logger.info(`✅ Seeded ${orders.length} orders`);
+    
+    const payments = await seedPayments();
+    logger.info(`✅ Seeded ${payments.length} payments`);
     
     const cartItems = await seedCartItems();
     logger.info(`✅ Seeded ${cartItems.length} cart items`);
