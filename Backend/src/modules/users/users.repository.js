@@ -57,8 +57,30 @@ const savePushToken = async({
   return result[0];
 };
 
+// UPLOAD AVATAR 
+const uploadAvatar = async({
+  avatarUrl,
+  avatarPublicId,
+  userId
+}) => {
+    const result = await db
+      .update(users)
+      .values({
+        avatarUrl,
+        avatarPublicId
+      })
+      .where(eq(users.id, userId))
+      .returning({
+        avatarUrl,
+        avatarPublicId
+      });
+      
+      return result[0];
+  };
+
 export const UsersRepository = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
+  uploadAvatar,
 };

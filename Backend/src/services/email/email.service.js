@@ -22,4 +22,4 @@ export const sendEmail = async ({
     console.error(`❌ Failed to send verification email to ${to}:`, error);
     throw error;
   }
-};
+}; 

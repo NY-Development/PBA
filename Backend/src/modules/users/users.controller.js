@@ -1,6 +1,25 @@
 import { UsersService } from "./users.service.js";
 import logger from "../../utils/logger.js";
 
+
+// SAVE EXPO TOKEN 
+const savePushToken = async(req, res) => {
+  try{
+    const notification = await UsersService.savePushToken({
+      userId: req.body.userId,
+      token: req.body.token
+    });
+    res.status(200).json({
+      message: "Expo push token saved successfully"
+    });
+  }catch(err){
+    logger.error(`Error saving expo token: ${err.message}`);
+    res.status(400).json({
+      message: err.message
+    });
+  }
+};
+
 // USER PROFILE 
 const getUserProfile = async(req, res) => {
   try{
@@ -25,7 +44,6 @@ const updateUserProfile = async (req, res) => {
     const updated = await UsersService.updateUserProfile({
       bodyData: req.body,
       userId: req.user.userId,
-      avatarBuffer: req.file?.buffer,
     });
 
     return res.status(200).json({
@@ -43,28 +61,36 @@ const updateUserProfile = async (req, res) => {
 };
 
 // UPLOAD AVATAR
-
-
-// SAVE EXPO TOKEN 
-const savePushToken = async(req, res) => {
+const uploadAvatar = async(req, res) => {
   try{
-    const notification = await UsersService.savePushToken({
-      userId: req.body.userId,
-      token: req.body.token
+    const {
+      avatarUrl,
+      avatarPublicId
+    } = await UsersService.uploadAvatar({
+      userId: req.user.userId,
+      avatarBuffer: req.file?.buffer,
     });
+    
     res.status(200).json({
-      message: "Expo push token saved successfully"
+      message: "Avatar uploaded successfully",
+      avatarUrl,
+      avatarPublicId
     });
+    
   }catch(err){
-    logger.error(`Error saving expo token: ${err.message}`);
+    logger.error(`Error uploading avatar: ${err.message}`);
+    
     res.status(400).json({
       message: err.message
     });
   }
 };
 
+
+
 export const UsersController = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
+  uploadAvatar,
 };

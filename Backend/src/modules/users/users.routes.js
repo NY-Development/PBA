@@ -7,6 +7,12 @@ import { updateUserProfileSchema } from "./users.validation.js";
  
 const router = Router();
 
+router.post(
+  "/push-token", 
+  protect, 
+  UsersController.savePushToken
+);
+
 router.get(
   "/profile", 
   protect, 
@@ -16,15 +22,17 @@ router.get(
 router.patch(
   "/profile", 
   protect,
-  upload.single("avatar"),
   validate(updateUserProfileSchema),
   UsersController.updateUserProfile
 );
 
-router.post(
-  "/push-token", 
-  protect, 
-  UsersController.savePushToken
+router.patch(
+  "/avatar", 
+  protect,
+  upload.single("avatar"),
+  UsersController.uploadAvatar
 );
+
+
 
 export default router;

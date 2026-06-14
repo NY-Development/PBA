@@ -54,21 +54,6 @@ const updateUserProfile = async ({
   if (!user) {
     throw new Error("User not found");
   }
-
-  let avatarUrl = user.avatarBuffer;
-  let avatarPublicId = user.avatarPublicId;
-
-  if (avatarBuffer) {
-    const uploaded = await uploadToCloudinary(
-      avatarBuffer,
-      `profiles/${userId}`
-    );
-    if (user.avatarPublicId) {
-      await deleteFromCloudinary(user.avatarPublicId);
-    }
-    avatarUrl = uploaded.secure_url;
-    avatarPublicId = uploaded.public_id;
-  }
   
   const updateData = {};
 
@@ -77,12 +62,6 @@ const updateUserProfile = async ({
   
   if (lastName !== undefined)
     updateData.lastName = lastName;
-  
-  if (avatarUrl !== undefined)
-    updateData.avatarUrl = avatarUrl;
-  
-  if (avatarPublicId !== undefined)
-    updateData.avatarPublicId = avatarPublicId;
     
   if (phone !== undefined)
     updateData.phone = phone;
@@ -120,8 +99,43 @@ export const savePushToken = async ({
   };
 };
 
+// UPLOAD AVATAR 
+const uploadAvatar = async ({
+  userId,
+  avatarBuffer,
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  let avatarUrl = user.avatarBuffer;
+  let avatarPublicId = user.avatarPublicId;
+
+  if (avatarBuffer) {
+    const uploaded = await uploadToCloudinary(
+      avatarBuffer,
+      `profiles/${userId}`
+    );
+    if (user.avatarPublicId) {
+      await deleteFromCloudinary(user.avatarPublicId);
+    }
+    avatarUrl = uploaded.secure_url;
+    avatarPublicId = uploaded.public_id;
+  }
+  
+  const result = await UsersRepository.uploadAvatar({
+    avatarUrl,
+    avatarPublicId,
+    userId
+  });
+ 
+  return {
+    avatarUrl,
+    avatarPublicId
+  };
+};
+
 export const UsersService = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
+  uploadAvatar,
 };
