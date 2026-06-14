@@ -1,5 +1,6 @@
 import { seedUsers } from "./users.js";
 import { seedAddresses } from "./addresses.js";
+import { seedVendors } from "./vendors.js";
 import logger from "../../utils/logger.js";
 
 const seed = async () => {
@@ -10,9 +11,12 @@ const seed = async () => {
     
     const addresses = await seedAddresses(users);
     logger.info(`✅ Seeded ${addresses.length} addresses`);
+    
+    const vendors = await seedVendors(users);
+    logger.info(`✅ Seeded ${vendors.length} vendors`);
 
   } catch (err) {
-    logger.error(err.cause);
+    logger.error(err.cause || err.message);
   }
 };
 
