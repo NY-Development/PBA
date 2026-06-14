@@ -170,6 +170,26 @@ const updateAddress = async(req, res) => {
   }
 };
 
+// DELETE ADDRESS 
+const deleteAddress = async(req, res) => {
+  try{
+    const result = await UsersService.deleteAddress({
+      id: req.params.id,
+      userId: req.user.userId
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: result.message
+    });
+  }catch(err){
+    logger.error(`Error deleting address: ${err.message}`);
+    
+    res.status(500).json({
+      message: err.message
+    });
+  }
+};
 
 export const UsersController = {
   savePushToken,
@@ -180,4 +200,5 @@ export const UsersController = {
   createAddresses,
   getAddress,
   updateAddress,
+  deleteAddress,
 };

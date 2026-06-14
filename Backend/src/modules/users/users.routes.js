@@ -57,5 +57,11 @@ router.patch(
   UsersController.updateAddress
 );
 
+router.delete(
+  "/addresses/:id", 
+  protect,
+  UsersController.deleteAddress
+);
+
 
 export default router;

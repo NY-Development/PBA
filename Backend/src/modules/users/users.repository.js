@@ -140,6 +140,27 @@ const updateAddress = async ({
   return result[0];
 };
 
+// DELETE ADDRESS
+const deleteAddress = async({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .delete(addresses)
+    .where(
+      and(
+        eq(addresses.id, id),
+        eq(addresses.userId, userId),
+      )
+    );
+  
+  return {
+    message: "Address deleted successfully"
+  };
+};
+
+
 export const UsersRepository = {
   savePushToken,
   getUserProfile,
@@ -149,4 +170,5 @@ export const UsersRepository = {
   createAddresses,
   getAddress,
   updateAddress,
+  deleteAddress,
 };
