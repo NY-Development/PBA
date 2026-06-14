@@ -222,27 +222,16 @@ const updateAddress = async({
   return result;
 };
 
-// DELETE ADDRESS
-const deleteAddress = async({
-  userId,
-  id
-}) => {
+// GET NOTIFICATIONS 
+const getNotifications = async(userId) => {
   if(!userId) throw new Error("User id not found");
-  if(!id) throw new Error("Address id not found");
   
-  const address = await UsersRepository.getAddress({
-    id,
-    userId
-  });
-  if(!address) throw new Error("Address not found");
-  
-  const result = await UsersRepository.deleteAddress({
-    userId,
-    id
-  });
+  const result = await UsersRepository.deleteAddress(userId);
   
   return result;
 };
+
+
 
 
 
@@ -256,4 +245,5 @@ export const UsersService = {
   getAddress,
   updateAddress,
   deleteAddress,
+  getNotifications,
 };

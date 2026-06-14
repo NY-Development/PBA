@@ -191,6 +191,28 @@ const deleteAddress = async(req, res) => {
   }
 };
 
+// GET NOTIFICATIONS 
+const getNotifications = async(req, res) => {
+  try{
+    const notifications = await UsersService.getNotifications(
+      req.user.userId
+    );
+    
+    res.status(200).json({
+      success: true,
+      notifications
+    });
+  }catch(err){
+    logger.error(`Error getting notifications: ${err.message}`);
+    
+    res.status(500).json({
+      message: err.message
+    });
+  }
+};
+
+
+
 export const UsersController = {
   savePushToken,
   getUserProfile,
@@ -201,4 +223,5 @@ export const UsersController = {
   getAddress,
   updateAddress,
   deleteAddress,
+  getNotifications,
 };

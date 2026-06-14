@@ -15,6 +15,13 @@
       "when": 1781102639982,
       "tag": "0001_flashy_sentry",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781436662176,
+      "tag": "0002_magical_jane_foster",
+      "breakpoints": true
     }
   ]
 }
