@@ -12,6 +12,7 @@ import { seedOrderItems } from "./orderItems.js";
 import { seedPayments } from "./payments.js";
 import { seedExpoTokens } from "./expoTokens.js";
 import { seedOTPs } from "./otps.js";
+import { seedRefreshTokens } from "./refreshTokens.js";
 
 
 const seed = async () => {
@@ -33,6 +34,9 @@ const seed = async () => {
     
     const expoTokens = await seedUsers();
     logger.info(`✅ Seeded ${expoTokens.length} Expo tokens`);
+    
+    const refreshTokens = await seedRefreshTokens();
+    logger.info(`✅ Seeded ${refreshTokens.length} refresh tokens`);
     
     const vendors = await seedVendors(users);
     logger.info(`✅ Seeded ${vendors.length} vendors`);
