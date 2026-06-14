@@ -1,8 +1,10 @@
+import logger from "../../utils/logger.js";
 import { seedUsers } from "./users.js";
 import { seedAddresses } from "./addresses.js";
 import { seedVendors } from "./vendors.js";
 import { seedCategories } from "./categories.js";
-import logger from "../../utils/logger.js";
+import { seedNotifications } from "./notifications.js";
+
 
 const seed = async () => {
   try {
@@ -18,6 +20,9 @@ const seed = async () => {
     
     const categories = await seedCategories();
     logger.info(`✅ Seeded ${categories.length} categories`);
+    
+    const notifications = await seedNotifications(users);
+    logger.info(`✅ Seeded ${notifications.length} notifications`);
 
   } catch (err) {
     logger.error(err.cause || err.message);
