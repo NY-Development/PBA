@@ -13,6 +13,7 @@ import { seedPayments } from "./payments.js";
 import { seedExpoTokens } from "./expoTokens.js";
 import { seedOTPs } from "./otps.js";
 import { seedRefreshTokens } from "./refreshTokens.js";
+import { seedReviews } from "./reviews.js";
 
 
 const seed = async () => {
@@ -43,6 +44,9 @@ const seed = async () => {
     
     const products = await seedProducts();
     logger.info(`✅ Seeded ${products.length} products`);
+    
+    const reviews = await seedReviews();
+    logger.info(`✅ Seeded ${reviews.length} reviews`);
     
     const addresses = await seedAddresses(users);
     logger.info(`✅ Seeded ${addresses.length} addresses`);

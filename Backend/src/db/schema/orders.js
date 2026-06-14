@@ -25,7 +25,6 @@ export const orders = pgTable("orders", {
   shippingFee: numeric("shipping_fee", { precision: 10, scale: 2 }).default("0"),
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
 
-  chapaId: text("chapa_id"),
   notes: text("notes"),
 
   createdAt: timestamp("created_at").defaultNow(),
