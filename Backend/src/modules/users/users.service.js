@@ -147,10 +147,36 @@ const getAddresses = async(userId) => {
   return addresses;
 };
 
+// CREATE ADDRESSES 
+const createAddresses = async({
+  userId,
+  body
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  if(body.length < 1){
+    throw new Error("No data provided");
+  }
+  
+  if (!Array.isArray(body)) {
+    throw new Error("Body data is not Array");
+  }
+  
+  const addressesToInsert = body.map((address) => ({
+    ...address,
+    userId,
+  }));
+  
+  const newAddresses = await UsersRepository.createAddresses(addressesToInsert);
+  
+  return newAddresses;
+};
+
 export const UsersService = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
   uploadAvatar,
   getAddresses,
+  createAddresses,
 };

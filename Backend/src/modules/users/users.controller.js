@@ -106,6 +106,27 @@ const getAddresses = async(req, res) => {
   }
 };
 
+// CREATE ADDRESSES 
+const createAddresses = async(req, res) => {
+  try{
+    const newAddresses = await UsersService.createAddresses({
+      userId: req.user.userId,
+      body: req.body
+    });
+    
+    res.status(200).json({
+      success: true,
+      addresses: newAddresses
+    });
+  }catch(err){
+    logger.error(`Error creating addresses: ${err.message}`);
+    
+    res.status(500).json({
+      message: err.message
+    });
+  }
+};
+
 
 export const UsersController = {
   savePushToken,
@@ -113,4 +134,5 @@ export const UsersController = {
   updateUserProfile,
   uploadAvatar,
   getAddresses,
+  createAddresses,
 };

@@ -91,10 +91,21 @@ const getAddresses = async(userId) => {
   return result;
 };
 
+const createAddresses = async (data) => {
+  
+  const result = await db
+    .insert(addresses)
+    .values(data)
+    .returning();
+
+  return result;
+};
+
 export const UsersRepository = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
   uploadAvatar,
-  getAddresses
+  getAddresses,
+  createAddresses,
 };
