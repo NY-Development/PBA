@@ -1,5 +1,5 @@
 import logger from "../../utils/logger.js";
-import { resetDatabase } from "./reset.js"
+import { resetDatabase } from "./reset.js";
 import { seedUsers } from "./users.js";
 import { seedAddresses } from "./addresses.js";
 import { seedVendors } from "./vendors.js";
@@ -8,6 +8,7 @@ import { seedNotifications } from "./notifications.js";
 import { seedOrders } from "./orders.js";
 import { seedProducts } from "./products.js";
 import { seedCartItems } from "./cartItems.js";
+import { seedOrderItems } from "./orderItems.js";
 
 
 const seed = async () => {
@@ -38,6 +39,9 @@ const seed = async () => {
     
     const cartItems = await seedCartItems();
     logger.info(`✅ Seeded ${cartItems.length} cart items`);
+    
+    const orderItems = await seedOrderItems();
+    logger.info(`✅ Seeded ${orderItems.length} order items`);
     
     const notifications = await seedNotifications(users);
     logger.info(`✅ Seeded ${notifications.length} notifications`);
