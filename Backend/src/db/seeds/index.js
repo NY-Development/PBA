@@ -11,6 +11,7 @@ import { seedCartItems } from "./cartItems.js";
 import { seedOrderItems } from "./orderItems.js";
 import { seedPayments } from "./payments.js";
 import { seedExpoTokens } from "./expoTokens.js";
+import { seedOTPs } from "./otps.js";
 
 
 const seed = async () => {
@@ -26,6 +27,9 @@ const seed = async () => {
     
     const users = await seedUsers();
     logger.info(`✅ Seeded ${users.length} users`);
+    
+    const otps = await seedOTPs();
+    logger.info(`✅ Seeded ${otps.length} otps`);
     
     const expoTokens = await seedUsers();
     logger.info(`✅ Seeded ${expoTokens.length} Expo tokens`);
