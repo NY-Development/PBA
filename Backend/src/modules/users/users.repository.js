@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { expoTokens } from "../../db/schema/expoTokens.js";
 import { users } from "../../db/schema/users.js";
@@ -101,6 +101,25 @@ const createAddresses = async (data) => {
   return result;
 };
 
+// GET ADDRESS
+const getAddress = async({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .select()
+    .from(addresses)
+    .where(
+      and(
+        eq(addresses.id, id),
+        eq(addresses.userId, userId),
+      )
+    );
+  
+  return result;
+};
+
 export const UsersRepository = {
   savePushToken,
   getUserProfile,
@@ -108,4 +127,5 @@ export const UsersRepository = {
   uploadAvatar,
   getAddresses,
   createAddresses,
+  getAddress,
 };

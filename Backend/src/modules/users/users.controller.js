@@ -127,6 +127,27 @@ const createAddresses = async(req, res) => {
   }
 };
 
+// GET ADDRESS
+const getAddress = async(req, res) => {
+  try{
+    const address = await UsersService.getAddress({
+      id: req.params.id,
+      userId: req.user.userId
+    });
+    
+    res.status(200).json({
+      success: true,
+      address
+    });
+  }catch(err){
+    logger.error(`Error getting address: ${err.message}`);
+    
+    res.status(500).json({
+      message: err.message
+    });
+  }
+};
+
 
 export const UsersController = {
   savePushToken,
@@ -135,4 +156,5 @@ export const UsersController = {
   uploadAvatar,
   getAddresses,
   createAddresses,
+  getAddress,
 };

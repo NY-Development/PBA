@@ -45,5 +45,11 @@ router.post(
   UsersController.createAddresses
 );
 
+router.get(
+  "/addresses/:id", 
+  protect,
+  UsersController.getAddress
+);
+
 
 export default router;

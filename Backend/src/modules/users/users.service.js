@@ -172,6 +172,23 @@ const createAddresses = async({
   return newAddresses;
 };
 
+// GET ADDRESS
+const getAddress = async({
+  userId,
+  id
+}) => {
+  if(!userId) throw new Error("User id not found");
+  if(!id) throw new Error("Address id not found");
+  
+  const address = await UsersRepository.getAddress({
+    userId,
+    id
+  });
+  
+  return address;
+};
+
+
 export const UsersService = {
   savePushToken,
   getUserProfile,
@@ -179,4 +196,5 @@ export const UsersService = {
   uploadAvatar,
   getAddresses,
   createAddresses,
+  getAddress,
 };
