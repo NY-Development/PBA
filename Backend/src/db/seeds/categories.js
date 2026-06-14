@@ -5,11 +5,10 @@ import { categories } from "../schema/categories.js";
 
 export const seedCategories = async() => {
     const data = [
-      "Smooth",
-      "Crunchy",
-      "Sugar-Free",
-      "Chocolate",
-      "Smooth",
+      { name: "Crunchy" },
+      { name: "Sugar-Free" },
+      { name: "Chocolate" },
+      { name: "Smooth" },
     ];
 
   await db.delete(categories);
