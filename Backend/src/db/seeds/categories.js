@@ -11,5 +11,6 @@ export const seedCategories = async() => {
       { name: "Smooth" },
     ];
 
+  await db.delete(categories);
   return await db.insert(categories).values(data).returning();
 };
