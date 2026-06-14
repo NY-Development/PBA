@@ -51,5 +51,11 @@ router.get(
   UsersController.getAddress
 );
 
+router.patch(
+  "/addresses/:id", 
+  protect,
+  UsersController.updateAddress
+);
+
 
 export default router;

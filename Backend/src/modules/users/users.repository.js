@@ -67,7 +67,7 @@ const uploadAvatar = async({
 }) => {
   const result = await db
     .update(users)
-    .values({
+    .set({
       avatarUrl,
       avatarPublicId
     })
@@ -117,7 +117,27 @@ const getAddress = async({
       )
     );
   
-  return result;
+  return result[0];
+};
+
+const updateAddress = async ({
+  userId,
+  data,
+  id
+}) => {
+  
+  const result = await db
+    .update(addresses)
+    .set(data)
+    .where(
+      and(
+        eq(addresses.id, id),
+        eq(addresses.userId, userId)
+      )
+    )
+    .returning();
+
+  return result[0];
 };
 
 export const UsersRepository = {
@@ -128,4 +148,5 @@ export const UsersRepository = {
   getAddresses,
   createAddresses,
   getAddress,
+  updateAddress,
 };

@@ -188,6 +188,40 @@ const getAddress = async({
   return address;
 };
 
+// UPDATE ADDRESS
+const updateAddress = async({
+  userId,
+  body,
+  id
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const { street, label } = body;
+  
+  const address = await UsersRepository.getAddress({
+    id,
+    userId
+  });
+  if(!address) throw new Error("Address not found");
+  
+  const addressesToInsert = {};
+  
+  if (street !== undefined){
+    addressesToInsert.street = street;
+  }
+  if (label !== undefined){
+    addressesToInsert.label = label;
+  }
+  
+  const result = await UsersRepository.updateAddress({
+    id,
+    userId,
+    data: addressesToInsert
+  });
+  
+  return result;
+};
+
 
 export const UsersService = {
   savePushToken,
@@ -197,4 +231,5 @@ export const UsersService = {
   getAddresses,
   createAddresses,
   getAddress,
+  updateAddress,
 };
