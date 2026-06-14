@@ -63,5 +63,11 @@ router.delete(
   UsersController.deleteAddress
 );
 
+router.get(
+  "/notifications", 
+  protect,
+  UsersController.getNotifications
+);
+
 
 export default router;

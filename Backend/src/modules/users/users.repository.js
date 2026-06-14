@@ -3,6 +3,7 @@ import { db } from "../../db/index.js";
 import { expoTokens } from "../../db/schema/expoTokens.js";
 import { users } from "../../db/schema/users.js";
 import { addresses } from "../../db/schema/addresses.js";
+import { notifications } from "../../db/schema/notifications.js";
 
 const safeUser = {
   id: users.id,
@@ -160,6 +161,17 @@ const deleteAddress = async({
   };
 };
 
+// GET NOTIFICATIONS 
+const getNotifications = async (userId) => {
+  
+  const result = await db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.userId, userId));
+
+  return result;
+};
+
 
 export const UsersRepository = {
   savePushToken,
@@ -171,4 +183,5 @@ export const UsersRepository = {
   getAddress,
   updateAddress,
   deleteAddress,
+  getNotifications,
 };
