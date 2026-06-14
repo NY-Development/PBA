@@ -13,7 +13,5 @@ export const seedNotifications = async(users) => {
     isArchived: faker.datatype.boolean(),
   }));
 
-  await db.delete(notifications);
-
   return await db.insert(notifications).values(data).returning();
 };

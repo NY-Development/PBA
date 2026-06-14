@@ -5,10 +5,12 @@ import { seedVendors } from "./vendors.js";
 import { seedCategories } from "./categories.js";
 import { seedNotifications } from "./notifications.js";
 import { seedOrders } from "./orders.js";
+import { seedProducts } from "./products.js";
 
 
 const seed = async () => {
   try {
+    logger.info(` SEEDING DATA INITIATED `);
     
     const users = await seedUsers();
     logger.info(`✅ Seeded ${users.length} users`);
@@ -19,6 +21,9 @@ const seed = async () => {
     const vendors = await seedVendors(users);
     logger.info(`✅ Seeded ${vendors.length} vendors`);
     
+    const products = await seedProducts();
+    logger.info(`✅ Seeded ${products.length} products`);
+    
     const categories = await seedCategories();
     logger.info(`✅ Seeded ${categories.length} categories`);
     
@@ -27,6 +32,8 @@ const seed = async () => {
     
     const orders = await seedOrders();
     logger.info(`✅ Seeded ${orders.length} orders`);
+    
+    
 
   } catch (err) {
     logger.error(err.cause || err.message);

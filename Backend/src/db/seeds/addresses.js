@@ -12,8 +12,6 @@ export const seedAddresses = async(users) => {
     ]),
     street: faker.location.streetAddress(),
   }));
-  
-  await db.delete(addresses);
 
   return await db.insert(addresses).values(data).returning();
 };

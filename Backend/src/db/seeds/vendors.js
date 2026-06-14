@@ -16,7 +16,5 @@ export const seedVendors = async(users) => {
     bannerPublicId: faker.string.uuid(),
   }));
   
-  await db.delete(vendors);
-
   return await db.insert(vendors).values(data).returning();
 };

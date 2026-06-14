@@ -4,8 +4,6 @@ import { db } from "../index.js";
 import { users } from "../schema/users.js";
 
 export const seedUsers = async() => {
-  logger.info("Seeding user");
-  
   const data = Array.from({ length: 100 }, () => ({
     email: faker.internet.email().toLowerCase(),
     password: "$2b$10$abcdefghijklmnopqrstuv",
@@ -22,7 +20,5 @@ export const seedUsers = async() => {
     avatarPublicId: faker.string.uuid(),
   }));
   
-  await db.delete(users); 
-
   return await db.insert(users).values(data).returning();
 };

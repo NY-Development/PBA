@@ -30,6 +30,5 @@ export const seedOrders = async() => {
       };
     });
 
-  await db.delete(orders);
   return await db.insert(orders).values(data).returning();
 };
