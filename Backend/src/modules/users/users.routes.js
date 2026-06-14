@@ -33,6 +33,11 @@ router.patch(
   UsersController.uploadAvatar
 );
 
+router.get(
+  "/addresses", 
+  protect,
+  UsersController.getAddresses
+);
 
 
 export default router;

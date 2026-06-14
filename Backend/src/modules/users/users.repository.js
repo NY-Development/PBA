@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { expoTokens } from "../../db/schema/expoTokens.js";
 import { users } from "../../db/schema/users.js";
+import { addresses } from "../../db/schema/addresses.js";
 
 const safeUser = {
   id: users.id,
@@ -14,6 +15,23 @@ const safeUser = {
   avatarUrl: users.avatarUrl,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
+};
+
+
+// SAVE EXPO TOKEN
+const savePushToken = async({
+  userId,
+  token
+}) => {
+  const result = await db
+    .insert(expo_tokens)
+    .values({
+      userId,
+      token
+    })
+    .returning();
+    
+  return result[0];
 };
 
 // USER PROFILE 
@@ -41,46 +59,42 @@ const updateUserProfile = async ({
   return result[0] || null;
 };
 
-// SAVE EXPO TOKEN
-const savePushToken = async({
-  userId,
-  token
-}) => {
-  const result = await db
-    .insert(expo_tokens)
-    .values({
-      userId,
-      token
-    })
-    .returning();
-    
-  return result[0];
-};
-
 // UPLOAD AVATAR 
 const uploadAvatar = async({
   avatarUrl,
   avatarPublicId,
   userId
 }) => {
-    const result = await db
-      .update(users)
-      .values({
-        avatarUrl,
-        avatarPublicId
-      })
-      .where(eq(users.id, userId))
-      .returning({
-        avatarUrl,
-        avatarPublicId
-      });
-      
-      return result[0];
-  };
+  const result = await db
+    .update(users)
+    .values({
+      avatarUrl,
+      avatarPublicId
+    })
+    .where(eq(users.id, userId))
+    .returning({
+      avatarUrl,
+      avatarPublicId
+    });
+    
+  return result[0];
+};
+
+// GET ADDRESSES 
+const getAddresses = async(userId) => {
+  
+  const result = await db
+    .select()
+    .from(addresses)
+    .where(eq(addresses.userId, userId));
+  
+  return result;
+};
 
 export const UsersRepository = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
   uploadAvatar,
+  getAddresses
 };

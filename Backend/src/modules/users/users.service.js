@@ -3,6 +3,31 @@ import { CacheService } from "../../utils/cache.js";
 import { AuthRepository } from "../auth/auth.repository.js";
 
 
+// SAVE EXPO TOKEN 
+export const savePushToken = async ({
+  userId,
+  token }) => {
+  
+  if(!userId){
+    throw new Error("User id not found");
+  }
+  if(!token){
+    throw new Error("Token is undefined");
+  }
+  
+  const result = await UsersRepository.savePushToken({
+    userId,
+    token
+  });
+  
+  const cacheKey = `expo_token:${token}`;
+  await CacheService.set(cacheKey, result);
+  
+  return {
+    message: "Expo push token saved successfully"
+  };
+};
+
 // GET USER PROFILE
 const getUserProfile = async({
   userId,
@@ -40,7 +65,6 @@ const getUserProfile = async({
 const updateUserProfile = async ({
   userId,
   bodyData,
-  avatarBuffer,
 }) => {
 
   const { firstName, lastName, phone } = bodyData;
@@ -74,31 +98,6 @@ const updateUserProfile = async ({
   return result;
 };
 
-// SAVE EXPO TOKEN 
-export const savePushToken = async ({
-  userId,
-  token }) => {
-  
-  if(!userId){
-    throw new Error("User id not found");
-  }
-  if(!token){
-    throw new Error("Token is undefined");
-  }
-  
-  const result = await UsersRepository.savePushToken({
-    userId,
-    token
-  });
-  
-  const cacheKey = `expo_token:${token}`;
-  await CacheService.set(cacheKey, result);
-  
-  return {
-    message: "Expo push token saved successfully"
-  };
-};
-
 // UPLOAD AVATAR 
 const uploadAvatar = async ({
   userId,
@@ -106,7 +105,13 @@ const uploadAvatar = async ({
 }) => {
   if(!userId) throw new Error("User id not found");
   
-  let avatarUrl = user.avatarBuffer;
+  const user = await AuthRepository.findUserById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  let avatarUrl = user.avatarUrl;
   let avatarPublicId = user.avatarPublicId;
 
   if (avatarBuffer) {
@@ -133,9 +138,19 @@ const uploadAvatar = async ({
   };
 };
 
+// GET ADDRESSES 
+const getAddresses = async(userId) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const addresses = await UsersRepository.getAddresses(userId);
+  
+  return addresses;
+};
+
 export const UsersService = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
   uploadAvatar,
+  getAddresses,
 };
