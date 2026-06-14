@@ -33,13 +33,13 @@ const seed = async () => {
     const otps = await seedOTPs();
     logger.info(`✅ Seeded ${otps.length} otps`);
     
-    const expoTokens = await seedUsers();
+    const expoTokens = await seedExpoTokens();
     logger.info(`✅ Seeded ${expoTokens.length} Expo tokens`);
     
     const refreshTokens = await seedRefreshTokens();
     logger.info(`✅ Seeded ${refreshTokens.length} refresh tokens`);
     
-    const vendors = await seedVendors(users);
+    const vendors = await seedVendors();
     logger.info(`✅ Seeded ${vendors.length} vendors`);
     
     const products = await seedProducts();
@@ -48,7 +48,7 @@ const seed = async () => {
     const reviews = await seedReviews();
     logger.info(`✅ Seeded ${reviews.length} reviews`);
     
-    const addresses = await seedAddresses(users);
+    const addresses = await seedAddresses();
     logger.info(`✅ Seeded ${addresses.length} addresses`);
     
     const orders = await seedOrders();
@@ -63,7 +63,7 @@ const seed = async () => {
     const orderItems = await seedOrderItems();
     logger.info(`✅ Seeded ${orderItems.length} order items`);
     
-    const notifications = await seedNotifications(users);
+    const notifications = await seedNotifications();
     logger.info(`✅ Seeded ${notifications.length} notifications`);
 
   } catch (err) {
