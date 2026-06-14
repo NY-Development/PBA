@@ -48,6 +48,9 @@ const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 // PAYMENT VERIFICATION
 const PAYMENT_API_KEY = process.env.PAYMENT_API_KEY;
 
+// SEED USER CONFIGURATION
+const SEED_USER_ID = process.env.SEED_USER_ID;
+
 
 
 export const Env = {
@@ -80,5 +83,7 @@ export const Env = {
   TEST_USER,
   TEST_PASS,
   
-  PAYMENT_API_KEY
+  PAYMENT_API_KEY,
+  
+  SEED_USER_ID,
 }
