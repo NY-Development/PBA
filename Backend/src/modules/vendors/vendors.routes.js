@@ -54,5 +54,13 @@ router.patch(
   VendorsController.uploadBanner
 );
 
+router.patch(
+  "/license", 
+  protect,
+  authorize("vendor"),
+  upload.single("banner"),
+  VendorsController.uploadLicense
+);
+
 
 export default router;
