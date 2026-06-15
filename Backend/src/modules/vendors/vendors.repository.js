@@ -63,6 +63,21 @@ const getVendors = async () => {
   return result;
 };
 
+const updateProfile = async ({
+  userId,
+  data
+}) => {
+  const result = await db
+    .update(vendors)
+    .set(data)
+    .where(
+      eq(vendors.userId, userId)
+    )
+    .returning();
+
+  return result[0];
+};
+
 export const VendorsRepository = {
   register,
   findUserById,
@@ -70,4 +85,5 @@ export const VendorsRepository = {
   findVendorById,
   verifyVendor,
   getVendors,
+  updateProfile,
 };

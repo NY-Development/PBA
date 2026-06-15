@@ -33,5 +33,12 @@ router.get(
   VendorsController.getVendors
 );
 
+router.patch(
+  "/profile", 
+  protect,
+  authorize("vendor"),
+  VendorsController.updateProfile
+);
+
 
 export default router;

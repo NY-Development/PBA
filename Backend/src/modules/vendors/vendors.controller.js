@@ -63,10 +63,33 @@ const getVendors = async(req, res) => {
   }
 };
 
+// UPDATE VENDOR PROFILE 
+const updateProfile = async(req, res) => {
+  try{
+    const updated = await VendorsService.updateProfile({
+      userId: req.user.userId,
+      body: req.body
+    });
+    
+    res.status(200).json({
+      success: true,
+      updated
+    });
+  }catch(err){
+    logger.error(`Error updating vendor profile: ${err.cause || err.message}`);
+    
+    res.status(400).json({
+      success: false,
+      message: err.cause || err.message
+    });
+  }
+};
+
 
 
 export const VendorsController = {
   verifyVendor,
   register,
   getVendors,
+  updateProfile,
 };

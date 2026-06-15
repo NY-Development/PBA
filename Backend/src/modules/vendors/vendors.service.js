@@ -80,10 +80,10 @@ const register = async ({
 }) => {
 
   const {
-    store_name,
+    storeName,
     description,
-    payout_email,
-    tin_number,
+    payoutEmail,
+    tinNumber,
   } = bodyData;
   
   if(!userId){
@@ -143,12 +143,12 @@ const register = async ({
   const vendor = await VendorsRepository.register({
     userId,
 
-    storeName: store_name,
+    storeName,
     description,
 
-    payoutEmail: payout_email,
+    payoutEmail,
 
-    tinNumber: tin_number,
+    tinNumber,
 
     status: "pending",
 
@@ -172,7 +172,7 @@ const register = async ({
 
       headerIcon: "📩",
 
-      title: `${store_name} wants to join PBA`,
+      title: `${storeName} wants to join PBA`,
 
       subtitle: "Waiting for approval.",
 
@@ -197,8 +197,53 @@ const getVendors = async() => {
   return result;
 };
 
+// UPDATE VENDOR PROFILE
+const updateProfile = async({
+  userId,
+  body
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const user = await VendorsRepository.findUserById(userId);
+  
+  if(!user) throw new Error("User not found");
+  if(!user.isActive) throw new Error("Your account is temporarily locked/inactive");
+  
+  const vendor = await VendorsRepository.findVendorByUserId(userId);
+  if(!vendor) throw new Error("Vendor not found");
+  
+  const allowedStates = ['pending', 'inactive', 'active'];
+  if(!allowedStates.includes(vendor.status.toLowerCase())){
+    throw new Error("Your Account status doesn't allow you to perform this action");
+  };
+  
+  const { storeName, description } = body;
+  
+  const data = {};
+  
+  if(storeName !== undefined){
+    data.storeName = storeName;
+  }
+  if(description !== undefined){
+    data.description = description;
+  }
+  
+  if (Object.keys(data).length === 0) {
+    throw new Error('No data provided to update');
+  }
+  
+  
+  const result = await VendorsRepository.updateProfile({
+    userId,
+    data
+  });
+  
+  return result;
+};
+
 export const VendorsService = {
   verifyVendor,
   register,
   getVendors,
+  updateProfile,
 };
