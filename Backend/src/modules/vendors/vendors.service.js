@@ -277,6 +277,55 @@ const uploadLogo = async ({
   return { message };
 };
 
+// UPLOAD BANNER
+const uploadBanner = async ({
+  userId,
+  banner_buffer,
+}) => {
+  
+  if(!userId){
+    throw new Error("User id is required");
+  }
+  
+  const userExists = await VendorsRepository.findUserById(
+    userId
+  );
+
+  if (!userExists) {
+    throw new Error(
+      "User doesn't exist"
+    );
+  }
+  
+  if (!banner_buffer) {
+    throw new Error("Logo is missing");
+  }
+
+  const vendorExists =
+    await VendorsRepository.findVendorByUserId(userId);
+
+  if (vendorExists) {
+    throw new Error(
+      "You've already registered as vendor"
+    );
+  }
+
+  const bannerResult = await uploadToCloudinary(
+    logo_buffer,
+    `vendors/banner/${userId}`
+  );
+  
+  const dataToInsert = {
+    userId,
+    bannerUrl: bannerResult.secure_url,
+    bannerPublicId: bannerResult.public_id,
+  };
+
+  const { message } = await VendorsRepository.uploadBanner(dataToInsert);
+
+  return { message };
+};
+
 
 export const VendorsService = {
   verifyVendor,
@@ -284,4 +333,5 @@ export const VendorsService = {
   getVendors,
   updateProfile,
   uploadLogo,
+  uploadBanner,
 };

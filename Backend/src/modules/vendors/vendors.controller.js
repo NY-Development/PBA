@@ -25,8 +25,6 @@ const register = async (req, res) => {
     const vendor = await VendorsService.register({
       userId: req.user.userId, 
       bodyData: req.body,
-      banner_buffer: req.files?.banner?.[0]?.buffer,
-      license_buffer: req.files?.license?.[0]?.buffer,
     });
 
     return res.status(200).json({
@@ -106,6 +104,28 @@ const uploadLogo = async(req, res) => {
   }
 };
 
+// UPLOAD BANNER 
+const uploadBanner = async(req, res) => {
+  try{
+    const { message } = await VendorsService.uploadBanner({
+      userId: req.user.userId,
+      banner_buffer: req.file?.buffer,
+    });
+    
+    res.status(200).json({
+      success: true,
+      message
+    });
+  }catch(err){
+    logger.error(`Error uploading banner: ${err.cause || err.message}`);
+    
+    res.status(400).json({
+      success: false,
+      message: err.cause || err.message
+    });
+  }
+};
+
 
 
 export const VendorsController = {
@@ -114,4 +134,5 @@ export const VendorsController = {
   getVendors,
   updateProfile,
   uploadLogo,
+  uploadBanner
 };
