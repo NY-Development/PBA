@@ -19,7 +19,9 @@ router.post(
   "/register", 
   protect,
   upload.fields([
-    { name: "license", maxCount: 1 }
+    { name: "logo", maxCount: 1 },
+    { name: "license", maxCount: 1 },
+    { name: "banner", maxCount: 1 },
   ]),
   VendorsController.register
 );
@@ -54,7 +56,7 @@ router.patch(
   VendorsController.uploadBanner
 );
 
-router.patch(
+router.post(
   "/license", 
   protect,
   authorize("vendor"),

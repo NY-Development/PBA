@@ -73,18 +73,33 @@ const verifyVendor = async ({ id }) => {
 // REGISTER
 const register = async ({
   userId,
+  logo_buffer,
+  banner_buffer,
+  license_buffer,
   bodyData,
 }) => {
 
   const {
-    storeName,
+    store_name,
     description,
-    payoutEmail,
-    tinNumber,
+    payout_email,
+    tin_number,
   } = bodyData;
   
   if(!userId){
     throw new Error("User id is required");
+  }
+  
+  if (!logo_buffer) {
+    throw new Error("Logo is required");
+  }
+  
+  if (!banner_buffer) {
+    throw new Error("Banner is required");
+  }
+  
+  if (!license_buffer) {
+    throw new Error("License document is required");
   }
 
   const existingUser =
@@ -105,16 +120,43 @@ const register = async ({
     );
   }
 
-  // Save vendor
+  const logoResult = await uploadToCloudinary(
+    logo_buffer,
+    `vendors/logo/${userId}`
+  );
+
+  const bannerResult = await uploadToCloudinary(
+    banner_buffer,
+    `vendors/banner/${userId}`
+  );
+
+  const licenseResult = await uploadToCloudinary(
+    license_buffer,
+    `vendors/license/${userId}`,
+    {
+      type: "private",
+    }
+  );
+
   const vendor = await VendorsRepository.register({
     userId,
 
-    storeName,
+    storeName: store_name,
     description,
 
-    payoutEmail,
+    payoutEmail: payout_email,
 
-    tinNumber,
+    tinNumber: tin_number,
+
+    status: "pending",
+
+    logoUrl: logoResult.secure_url,
+    bannerUrl: bannerResult.secure_url,
+
+    logoPublicId: logoResult.public_id,
+    bannerPublicId: bannerResult.public_id,
+
+    licensePublicId: licenseResult.public_id,
   });
 
   // Notify admin
@@ -128,7 +170,7 @@ const register = async ({
 
       headerIcon: "📩",
 
-      title: `${storeName} wants to join PBA`,
+      title: `${store_name} wants to join PBA`,
 
       subtitle: "Waiting for approval.",
 

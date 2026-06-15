@@ -25,10 +25,13 @@ const register = async (req, res) => {
     const vendor = await VendorsService.register({
       userId: req.user.userId, 
       bodyData: req.body,
+      logo_buffer: req.files?.logo?.[0]?.buffer,
+      banner_buffer: req.files?.banner?.[0]?.buffer,
+      license_buffer: req.files?.license?.[0]?.buffer,
     });
 
     return res.status(200).json({
-      message: "Vendor registered successfully",
+      message: "Vendor registered successfully, waiting for admin approval",
       vendor
     });
 
@@ -40,6 +43,7 @@ const register = async (req, res) => {
     });
   }
 };
+
 
 // GET VENDORS
 const getVendors = async(req, res) => {
