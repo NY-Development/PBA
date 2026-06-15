@@ -232,6 +232,26 @@ const readNotification = async(req, res) => {
   }
 };
 
+// READ ALL NOTIFICATION
+const readAllNotifications = async(req, res) => {
+  try{
+    const result = await UsersService.readAllNotifications(
+      req.user.userId
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: result
+    });
+  }catch(err){
+    logger.error(`Error reading all notifications: ${err.cause || err.message}`);
+    
+    res.status(500).json({
+      message: err.cause || err.message
+    });
+  }
+};
+
 
 
 export const UsersController = {
@@ -246,4 +266,5 @@ export const UsersController = {
   deleteAddress,
   getNotifications,
   readNotification,
+  readAllNotifications,
 };

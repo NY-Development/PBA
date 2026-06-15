@@ -210,7 +210,24 @@ const readNotification = async ({
     );
 
   return {
-    message: "Message read successfully"
+    message: "Notification read successfully"
+  };
+};
+
+// READ ALL NOTIFICATIONS 
+const readAllNotifications = async (userId) => {
+  
+  const result = await db
+    .update(notifications)
+    .set({
+      isRead: true
+    })
+    .where(
+      eq(notifications.userId, userId)
+    );
+
+  return {
+    message: "All notifications read successfully"
   };
 };
 
@@ -228,4 +245,5 @@ export const UsersRepository = {
   getNotifications,
   readNotification,
   findNotificationById,
+  readAllNotifications
 };

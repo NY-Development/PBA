@@ -75,5 +75,11 @@ router.patch(
   UsersController.readNotification
 );
 
+router.patch(
+  "/notifications/read-all", 
+  protect,
+  UsersController.readAllNotifications
+);
+
 
 export default router;
