@@ -57,8 +57,21 @@ const verifyVendor = async (id) => {
 
 const getVendors = async () => {
   const result = await db
-    .select()
-    .from(vendors);
+    .select({
+      firstName: users.firstName,
+      lastName: users.lastName,
+      storeName: vendors.storeName,
+      status: vendors.status,
+      isActive: users.isActive,
+      email: users.email,
+      phone: users.phone,
+      description: vendors.description,
+      logoUrl: vendors.logoUrl,
+      bannerUrl: vendors.bannerUrl,
+      createdAt: vendors.createdAt,
+    })
+    .from(vendors)
+    .innerJoin( users, eq(users.id, vendors.userId) );
 
   return result;
 };

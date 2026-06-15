@@ -28,8 +28,7 @@ router.post(
 
 router.get(
   "/", 
-  protect,
-  authorize("admin"),
+  protect, 
   VendorsController.getVendors
 );
 
