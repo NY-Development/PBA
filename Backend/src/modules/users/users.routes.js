@@ -69,5 +69,11 @@ router.get(
   UsersController.getNotifications
 );
 
+router.patch(
+  "/notifications/:id/read", 
+  protect,
+  UsersController.readNotification
+);
+
 
 export default router;

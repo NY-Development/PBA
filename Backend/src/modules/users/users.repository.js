@@ -172,6 +172,48 @@ const getNotifications = async (userId) => {
   return result;
 };
 
+// GET NOTIFICATION
+const findNotificationById = async ({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .select()
+    .from(notifications)
+    .where(
+      and(
+        eq(notifications.id, id),
+        eq(notifications.userId, userId)
+      )
+    );
+
+  return result[0];
+};
+
+// READ NOTIFICATION
+const readNotification = async ({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .update(notifications)
+    .set({
+      isRead: true
+    })
+    .where(
+      and(
+        eq(notifications.id, id),
+        eq(notifications.userId, userId)
+      )
+    );
+
+  return {
+    message: "Message read successfully"
+  };
+};
+
 
 export const UsersRepository = {
   savePushToken,
@@ -184,4 +226,6 @@ export const UsersRepository = {
   updateAddress,
   deleteAddress,
   getNotifications,
+  readNotification,
+  findNotificationById,
 };

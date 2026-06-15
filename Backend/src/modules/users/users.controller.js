@@ -211,6 +211,27 @@ const getNotifications = async(req, res) => {
   }
 };
 
+// READ NOTIFICATION
+const readNotification = async(req, res) => {
+  try{
+    const result = await UsersService.readNotification({
+      userId: req.user.userId,
+      id: req.params.id,
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: result
+    });
+  }catch(err){
+    logger.error(`Error reading notification: ${err.cause || err.message}`);
+    
+    res.status(500).json({
+      message: err.cause || err.message
+    });
+  }
+};
+
 
 
 export const UsersController = {
@@ -224,4 +245,5 @@ export const UsersController = {
   updateAddress,
   deleteAddress,
   getNotifications,
+  readNotification,
 };

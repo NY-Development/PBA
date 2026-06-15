@@ -255,6 +255,40 @@ const getNotifications = async(userId) => {
   return result;
 };
 
+// READ NOTIFICATION
+const readNotification = async({
+  userId,
+  id,
+}) => {
+  if(!userId){
+    throw new Error("User id not found");
+  }
+  if(!id){
+    throw new Error("id is required");
+  }
+  
+  const notification =
+    await UsersRepository.findNotificationById({
+      userId,
+      id
+    });
+    
+  if(!notification){
+    throw new Error("notification not found");
+  }
+  
+  if(notification.isRead){
+    throw new Error("Already read");
+  }
+  
+  const result = await UsersRepository.readNotification({
+    userId,
+    id
+  });
+  
+  return result; 
+};
+
 
 
 export const UsersService = {
@@ -268,4 +302,5 @@ export const UsersService = {
   updateAddress,
   deleteAddress,
   getNotifications,
+  readNotification,
 };
