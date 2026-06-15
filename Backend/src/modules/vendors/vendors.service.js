@@ -73,7 +73,6 @@ const verifyVendor = async ({ id }) => {
 // REGISTER
 const register = async ({
   userId,
-  logo_buffer,
   banner_buffer,
   license_buffer,
   bodyData,
@@ -88,10 +87,6 @@ const register = async ({
   
   if(!userId){
     throw new Error("User id is required");
-  }
-  
-  if (!logo_buffer) {
-    throw new Error("Logo is required");
   }
   
   if (!banner_buffer) {
@@ -120,12 +115,6 @@ const register = async ({
     );
   }
 
-  // Upload files
-  const logoResult = await uploadToCloudinary(
-    logo_buffer,
-    `vendors/logo/${userId}`
-  );
-
   const bannerResult = await uploadToCloudinary(
     banner_buffer,
     `vendors/banner/${userId}`
@@ -152,10 +141,8 @@ const register = async ({
 
     status: "pending",
 
-    logoUrl: logoResult.secure_url,
     bannerUrl: bannerResult.secure_url,
-
-    logoPublicId: logoResult.public_id,
+    
     bannerPublicId: bannerResult.public_id,
 
     licensePublicId: licenseResult.public_id,
@@ -241,9 +228,60 @@ const updateProfile = async({
   return result;
 };
 
+// UPLOAD LOGO
+const uploadLogo = async ({
+  userId,
+  logo_buffer,
+}) => {
+  
+  if(!userId){
+    throw new Error("User id is required");
+  }
+  
+  const userExists = await VendorsRepository.findUserById(
+    userId
+  );
+
+  if (!userExists) {
+    throw new Error(
+      "User doesn't exist"
+    );
+  }
+  
+  if (!logo_buffer) {
+    throw new Error("Logo is missing");
+  }
+
+  const vendorExists =
+    await VendorsRepository.findVendorByUserId(userId);
+
+  if (vendorExists) {
+    throw new Error(
+      "You've already registered as vendor"
+    );
+  }
+
+  const logoResult = await uploadToCloudinary(
+    logo_buffer,
+    `vendors/logo/${userId}`
+  );
+  
+  const dataToInsert = {
+    userId,
+    logoUrl: logoResult.secure_url,
+    logoPublicId: logoResult.public_id,
+  };
+
+  const { message } = await VendorsRepository.uploadLogo(dataToInsert);
+
+  return { message };
+};
+
+
 export const VendorsService = {
   verifyVendor,
   register,
   getVendors,
   updateProfile,
+  uploadLogo,
 };

@@ -78,6 +78,20 @@ const updateProfile = async ({
   return result[0];
 };
 
+const uploadLogo = async (data) => {
+  const result = await db
+    .update(vendors)
+    .set(data)
+    .where(
+      eq(vendors.userId, userId)
+    )
+    .returning();
+
+  return {
+    message:"Logo uploaded successfully"
+  };
+};
+
 export const VendorsRepository = {
   register,
   findUserById,
@@ -86,4 +100,5 @@ export const VendorsRepository = {
   verifyVendor,
   getVendors,
   updateProfile,
+  uploadLogo,
 };
