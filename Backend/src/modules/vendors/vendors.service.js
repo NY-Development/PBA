@@ -8,6 +8,68 @@ import {
 } from "../../templates/email.template.js";
 
 
+// VERIFY VENDOR
+const verifyVendor = async ({ id }) => {
+
+  const vendor =
+    await VendorsRepository.findVendorById(id);
+
+  if (!vendor) {
+    throw new Error("Vendor not found");
+  }
+
+  if (vendor.status === "verified") {
+    throw new Error("Vendor already verified");
+  }
+
+  const user =
+    await VendorsRepository.findUserById(vendor.userId);
+
+  const verifiedVendor =
+    await VendorsRepository.verifyVendor(id);
+
+  const notifyEmail =
+    vendor.payoutEmail || user.email;
+
+  await sendEmail({
+    to: notifyEmail,
+
+    subject: "Vendor Application Approved",
+
+    template: baseEmailTemplate({
+      appName: "PBA",
+
+      headerIcon: "✅",
+
+      title: "Vendor Application Approved",
+
+      subtitle:
+        "You can now start selling products.",
+
+      greeting: `${user.firstName},`,
+
+      message:
+        "Congratulations! Your application has been approved successfully.",
+
+      highlightContent:
+        "Your vendor account is now active.",
+
+      alertType: "success",
+
+      listItems: [
+        "Add products",
+        "Manage inventory",
+        "Track orders",
+        "Receive payouts",
+      ],
+
+      buttonText: "Open Dashboard",
+    }),
+  });
+
+  return verifiedVendor;
+};
+
 // REGISTER
 const register = async ({
   userId,
@@ -128,70 +190,15 @@ const register = async ({
   return vendor;
 };
 
-
-// VERIFY VENDOR
-const verifyVendor = async ({ id }) => {
-
-  const vendor =
-    await VendorsRepository.findVendorById(id);
-
-  if (!vendor) {
-    throw new Error("Vendor not found");
-  }
-
-  if (vendor.status === "verified") {
-    throw new Error("Vendor already verified");
-  }
-
-  const user =
-    await VendorsRepository.findUserById(vendor.userId);
-
-  const verifiedVendor =
-    await VendorsRepository.verifyVendor(id);
-
-  const notifyEmail =
-    vendor.payoutEmail || user.email;
-
-  await sendEmail({
-    to: notifyEmail,
-
-    subject: "Vendor Application Approved",
-
-    template: baseEmailTemplate({
-      appName: "PBA",
-
-      headerIcon: "✅",
-
-      title: "Vendor Application Approved",
-
-      subtitle:
-        "You can now start selling products.",
-
-      greeting: `${user.firstName},`,
-
-      message:
-        "Congratulations! Your application has been approved successfully.",
-
-      highlightContent:
-        "Your vendor account is now active.",
-
-      alertType: "success",
-
-      listItems: [
-        "Add products",
-        "Manage inventory",
-        "Track orders",
-        "Receive payouts",
-      ],
-
-      buttonText: "Open Dashboard",
-    }),
-  });
-
-  return verifiedVendor;
+// GET VENDORS 
+const getVendors = async() => {
+  const result = await VendorsRepository.getVendors();
+  
+  return result;
 };
 
 export const VendorsService = {
-  register,
   verifyVendor,
+  register,
+  getVendors,
 };

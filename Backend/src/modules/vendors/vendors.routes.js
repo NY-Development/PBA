@@ -3,10 +3,17 @@ import { Router } from "express";
 import { protect, authorize } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { upload } from "../../middlewares/upload.middleware.js";
-import { VendorsController } from "./vendors.controller.js"
+import { VendorsController } from "./vendors.controller.js";
 
 
 const router = Router();
+
+
+router.post(
+  "/verify-vendor", 
+  protect,
+  authorize("admin"),
+  VendorsController.verifyVendor);
 
 router.post(
   "/register", 
@@ -19,10 +26,12 @@ router.post(
   VendorsController.register
 );
 
-router.post(
-  "/verify-vendor", 
+router.get(
+  "/", 
   protect,
   authorize("admin"),
-  VendorsController.verifyVendor)
+  VendorsController.getVendors
+);
+
 
 export default router;

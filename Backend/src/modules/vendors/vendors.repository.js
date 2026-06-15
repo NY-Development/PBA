@@ -55,10 +55,19 @@ const verifyVendor = async (id) => {
   return result[0];
 };
 
+const getVendors = async () => {
+  const result = await db
+    .select()
+    .from(vendors);
+
+  return result;
+};
+
 export const VendorsRepository = {
   register,
   findUserById,
   findVendorByUserId,
   findVendorById,
   verifyVendor,
+  getVendors,
 };
