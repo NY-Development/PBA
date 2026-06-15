@@ -13,9 +13,9 @@ const savePushToken = async(req, res) => {
       message: "Expo push token saved successfully"
     });
   }catch(err){
-    logger.error(`Error saving expo token: ${err.message}`);
+    logger.error(`Error saving expo token: ${err.cause || err.message}`);
     res.status(400).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -31,9 +31,9 @@ const getUserProfile = async(req, res) => {
         data: profileInfo,
       });
   }catch(err){
-    logger.error(`Error getting user profile: ${err.message}`);
+    logger.error(`Error getting user profile: ${err.cause || err.message}`);
     res.status(400).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -52,10 +52,10 @@ const updateUserProfile = async (req, res) => {
     });
 
   } catch (err) {
-    logger.error(`Profile update error: ${err.message}`);
+    logger.error(`Profile update error: ${err.cause || err.message}`);
 
     return res.status(400).json({
-      message: err.message || "Failed to update user"
+      message: err.cause || err.message
     });
   }
 };
@@ -78,10 +78,10 @@ const uploadAvatar = async(req, res) => {
     });
     
   }catch(err){
-    logger.error(`Error uploading avatar: ${err.message}`);
+    logger.error(`Error uploading avatar: ${err.cause || err.message}`);
     
     res.status(400).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -98,10 +98,10 @@ const getAddresses = async(req, res) => {
       addresses
     });
   }catch(err){
-    logger.error(`Error getting addresses: ${err.message}`);
+    logger.error(`Error getting addresses: ${err.cause || err.message}`);
     
     res.status(500).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -119,10 +119,10 @@ const createAddresses = async(req, res) => {
       addresses: newAddresses
     });
   }catch(err){
-    logger.error(`Error creating addresses: ${err.message}`);
+    logger.error(`Error creating addresses: ${err.cause || err.message}`);
     
     res.status(500).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -140,10 +140,10 @@ const getAddress = async(req, res) => {
       address
     });
   }catch(err){
-    logger.error(`Error getting address: ${err.message}`);
+    logger.error(`Error getting address: ${err.cause || err.message}`);
     
     res.status(500).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -162,10 +162,10 @@ const updateAddress = async(req, res) => {
       address
     });
   }catch(err){
-    logger.error(`Error updating address: ${err.message}`);
+    logger.error(`Error updating address: ${err.cause || err.message}`);
     
     res.status(500).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -183,10 +183,10 @@ const deleteAddress = async(req, res) => {
       message: result.message
     });
   }catch(err){
-    logger.error(`Error deleting address: ${err.message}`);
+    logger.error(`Error deleting address: ${err.cause || err.message}`);
     
     res.status(500).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
@@ -203,10 +203,10 @@ const getNotifications = async(req, res) => {
       notifications
     });
   }catch(err){
-    logger.error(`Error getting notifications: ${err.message}`);
+    logger.error(`Error getting notifications: ${err.cause || err.message}`);
     
     res.status(500).json({
-      message: err.message
+      message: err.cause || err.message
     });
   }
 };
