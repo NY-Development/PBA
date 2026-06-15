@@ -83,7 +83,7 @@ const uploadLogo = async (data) => {
     .update(vendors)
     .set(data)
     .where(
-      eq(vendors.userId, userId)
+      eq(vendors.userId, data.userId)
     )
     .returning();
 
@@ -97,12 +97,26 @@ const uploadBanner = async (data) => {
     .update(vendors)
     .set(data)
     .where(
-      eq(vendors.userId, userId)
+      eq(vendors.userId, data.userId)
     )
     .returning();
 
   return {
     message:"banner uploaded successfully"
+  };
+};
+
+const uploadLicense = async (data) => {
+  const result = await db
+    .update(vendors)
+    .set(data)
+    .where(
+      eq(vendors.userId, data.userId)
+    )
+    .returning();
+
+  return {
+    message:"license uploaded successfully"
   };
 };
 
@@ -116,4 +130,5 @@ export const VendorsRepository = {
   updateProfile,
   uploadLogo,
   uploadBanner,
+  uploadLicense,
 };

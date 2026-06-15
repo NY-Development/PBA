@@ -73,8 +73,6 @@ const verifyVendor = async ({ id }) => {
 // REGISTER
 const register = async ({
   userId,
-  banner_buffer,
-  license_buffer,
   bodyData,
 }) => {
 
@@ -87,14 +85,6 @@ const register = async ({
   
   if(!userId){
     throw new Error("User id is required");
-  }
-  
-  if (!banner_buffer) {
-    throw new Error("Banner is required");
-  }
-  
-  if (!license_buffer) {
-    throw new Error("License document is required");
   }
 
   const existingUser =
@@ -115,19 +105,6 @@ const register = async ({
     );
   }
 
-  const bannerResult = await uploadToCloudinary(
-    banner_buffer,
-    `vendors/banner/${userId}`
-  );
-
-  const licenseResult = await uploadToCloudinary(
-    license_buffer,
-    `vendors/license/${userId}`,
-    {
-      type: "private",
-    }
-  );
-
   // Save vendor
   const vendor = await VendorsRepository.register({
     userId,
@@ -138,14 +115,6 @@ const register = async ({
     payoutEmail,
 
     tinNumber,
-
-    status: "pending",
-
-    bannerUrl: bannerResult.secure_url,
-    
-    bannerPublicId: bannerResult.public_id,
-
-    licensePublicId: licenseResult.public_id,
   });
 
   // Notify admin
@@ -326,6 +295,58 @@ const uploadBanner = async ({
   return { message };
 };
 
+// UPLOAD LICENSE
+const uploadLicense = async ({
+  userId,
+  license_buffer,
+}) => {
+  
+  if(!userId){
+    throw new Error("User id is required");
+  }
+  
+  const userExists = await VendorsRepository.findUserById(
+    userId
+  );
+
+  if (!userExists) {
+    throw new Error(
+      "User doesn't exist"
+    );
+  }
+
+  const vendorExists =
+    await VendorsRepository.findVendorByUserId(userId);
+
+  if (vendorExists) {
+    throw new Error(
+      "You've already registered as vendor"
+    );
+  }
+  
+  if (!license_buffer) {
+    throw new Error("License document is required");
+  }
+
+  const licenseResult = await uploadToCloudinary(
+    license_buffer,
+    `vendors/license/${userId}`,
+    {
+      type: "private",
+    }
+  );
+
+  const dataToInsert = {
+    userId,
+    licensePublicId: licenseResult.public_id,
+  };
+
+  const { message } = 
+    await VendorsRepository.uploadLicense(dataToInsert);
+
+  return { message };
+};
+
 
 export const VendorsService = {
   verifyVendor,
@@ -334,4 +355,5 @@ export const VendorsService = {
   updateProfile,
   uploadLogo,
   uploadBanner,
+  uploadLicense,
 };

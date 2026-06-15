@@ -28,7 +28,7 @@ const register = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: "Vendor registered successfully, waiting for admin approval",
+      message: "Vendor registered successfully",
       vendor
     });
 
@@ -126,6 +126,28 @@ const uploadBanner = async(req, res) => {
   }
 };
 
+// UPLOAD LICENSE 
+const uploadLicense = async(req, res) => {
+  try{
+    const { message } = await VendorsService.uploadLicense({
+      userId: req.user.userId,
+      license_buffer: req.file?.buffer,
+    });
+    
+    res.status(200).json({
+      success: true,
+      message
+    });
+  }catch(err){
+    logger.error(`Error uploading License: ${err.cause || err.message}`);
+    
+    res.status(400).json({
+      success: false,
+      message: err.cause || err.message
+    });
+  }
+};
+
 
 
 export const VendorsController = {
@@ -134,5 +156,6 @@ export const VendorsController = {
   getVendors,
   updateProfile,
   uploadLogo,
-  uploadBanner
+  uploadBanner,
+  uploadLicense,
 };
