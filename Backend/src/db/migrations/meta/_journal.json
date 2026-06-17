@@ -15,6 +15,34 @@
       "when": 1781102639982,
       "tag": "0001_flashy_sentry",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781436662176,
+      "tag": "0002_magical_jane_foster",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781446381083,
+      "tag": "0003_lethal_punisher",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1781471133866,
+      "tag": "0004_blue_jackal",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1781471571548,
+      "tag": "0005_curious_kinsey_walden",
+      "breakpoints": true
     }
   ]
 }

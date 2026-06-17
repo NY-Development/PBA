@@ -3,6 +3,31 @@ import { CacheService } from "../../utils/cache.js";
 import { AuthRepository } from "../auth/auth.repository.js";
 
 
+// SAVE EXPO TOKEN 
+export const savePushToken = async ({
+  userId,
+  token }) => {
+  
+  if(!userId){
+    throw new Error("User id not found");
+  }
+  if(!token){
+    throw new Error("Token is undefined");
+  }
+  
+  const result = await UsersRepository.savePushToken({
+    userId,
+    token
+  });
+  
+  const cacheKey = `expo_token:${token}`;
+  await CacheService.set(cacheKey, result);
+  
+  return {
+    message: "Expo push token saved successfully"
+  };
+};
+
 // GET USER PROFILE
 const getUserProfile = async({
   userId,
@@ -40,7 +65,6 @@ const getUserProfile = async({
 const updateUserProfile = async ({
   userId,
   bodyData,
-  avatarBuffer,
 }) => {
 
   const { firstName, lastName, phone } = bodyData;
@@ -54,8 +78,40 @@ const updateUserProfile = async ({
   if (!user) {
     throw new Error("User not found");
   }
+  
+  const updateData = {};
 
-  let avatarUrl = user.avatarBuffer;
+  if (firstName !== undefined)
+    updateData.firstName = firstName;
+  
+  if (lastName !== undefined)
+    updateData.lastName = lastName;
+    
+  if (phone !== undefined)
+    updateData.phone = phone;
+
+  const result = await UsersRepository.updateUserProfile({
+    updateData,
+    userId
+  });
+ 
+  return result;
+};
+
+// UPLOAD AVATAR 
+const uploadAvatar = async ({
+  userId,
+  avatarBuffer,
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const user = await AuthRepository.findUserById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  let avatarUrl = user.avatarUrl;
   let avatarPublicId = user.avatarPublicId;
 
   if (avatarBuffer) {
@@ -70,58 +126,203 @@ const updateUserProfile = async ({
     avatarPublicId = uploaded.public_id;
   }
   
-  const updateData = {};
-
-  if (firstName !== undefined)
-    updateData.firstName = firstName;
-  
-  if (lastName !== undefined)
-    updateData.lastName = lastName;
-  
-  if (avatarUrl !== undefined)
-    updateData.avatarUrl = avatarUrl;
-  
-  if (avatarPublicId !== undefined)
-    updateData.avatarPublicId = avatarPublicId;
-    
-  if (phone !== undefined)
-    updateData.phone = phone;
-
-  const result = await UsersRepository.updateUserProfile({
-    updateData,
+  const result = await UsersRepository.uploadAvatar({
+    avatarUrl,
+    avatarPublicId,
     userId
   });
  
+  return {
+    avatarUrl,
+    avatarPublicId
+  };
+};
+
+// GET ADDRESSES 
+const getAddresses = async(userId) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const addresses = await UsersRepository.getAddresses(userId);
+  
+  return addresses;
+};
+
+// CREATE ADDRESSES 
+const createAddresses = async({
+  userId,
+  body
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  if(body.length < 1){
+    throw new Error("No data provided");
+  }
+  
+  if (!Array.isArray(body)) {
+    throw new Error("Body data is not Array");
+  }
+  
+  const addressesToInsert = body.map((address) => ({
+    ...address,
+    userId,
+  }));
+  
+  const newAddresses = await UsersRepository.createAddresses(addressesToInsert);
+  
+  return newAddresses;
+};
+
+// GET ADDRESS
+const getAddress = async({
+  userId,
+  id
+}) => {
+  if(!userId) throw new Error("User id not found");
+  if(!id) throw new Error("Address id not found");
+  
+  const address = await UsersRepository.getAddress({
+    userId,
+    id
+  });
+  
+  return address;
+};
+
+// UPDATE ADDRESS
+const updateAddress = async({
+  userId,
+  body,
+  id
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const { street, label } = body;
+  
+  const address = await UsersRepository.getAddress({
+    id,
+    userId
+  });
+  if(!address) throw new Error("Address not found");
+  
+  const addressesToInsert = {};
+  
+  if (street !== undefined){
+    addressesToInsert.street = street;
+  }
+  if (label !== undefined){
+    addressesToInsert.label = label;
+  }
+  
+  const result = await UsersRepository.updateAddress({
+    id,
+    userId,
+    data: addressesToInsert
+  });
+  
   return result;
 };
 
-// SAVE EXPO TOKEN 
-export const savePushToken = async ({
+// DELETE ADDRESS
+const deleteAddress = async({
   userId,
-  token }) => {
+  id
+}) => {
+  if(!userId) throw new Error("User id not found");
+  if(!id) throw new Error("Address id not found");
   
+  const address = await UsersRepository.getAddress({
+    id,
+    userId
+  });
+  if(!address) throw new Error("Address not found");
+  
+  const result = await UsersRepository.deleteAddress({
+    userId,
+    id
+  });
+  
+  return result;
+};
+
+// GET NOTIFICATIONS 
+const getNotifications = async(userId) => {
   if(!userId){
     throw new Error("User id not found");
   }
-  if(!token){
-    throw new Error("Token is undefined");
+  
+  const result = await UsersRepository.getNotifications(userId);
+  
+  return result;
+};
+
+// READ NOTIFICATION
+const readNotification = async({
+  userId,
+  id,
+}) => {
+  if(!userId){
+    throw new Error("User id not found");
+  }
+  if(!id){
+    throw new Error("id is required");
   }
   
-  const result = await UsersRepository.savePushToken({
+  const notification =
+    await UsersRepository.findNotificationById({
+      userId,
+      id
+    });
+    
+  if(!notification){
+    throw new Error("notification not found");
+  }
+  
+  if(notification.isRead){
+    throw new Error("Already read");
+  }
+  
+  const result = await UsersRepository.readNotification({
     userId,
-    token
+    id
   });
   
-  const cacheKey = `expo_token:${token}`;
-  await CacheService.set(cacheKey, result);
-  
-  return {
-    message: "Expo push token saved successfully"
-  };
+  return result; 
 };
+
+// READ ALL NOTIFICATIONS 
+const readAllNotifications = async(
+  userId,
+) => {
+  if(!userId){
+    throw new Error("User id not found");
+  }
+  
+  const notifications = await UsersRepository.getNotifications(userId);
+    
+  if(notifications<1){
+    throw new Error("you have no notifications to read");
+  }
+  
+  const result = await UsersRepository.readAllNotifications(
+    userId,
+  );
+  
+  return result; 
+};
+
+
 
 export const UsersService = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
+  uploadAvatar,
+  getAddresses,
+  createAddresses,
+  getAddress,
+  updateAddress,
+  deleteAddress,
+  getNotifications,
+  readNotification,
+  readAllNotifications
 };

@@ -278,6 +278,7 @@ const getMe = async ({
   if(session.revoked) throw new Error("This session has already been revoked");
   
   return {
+      id: user.id,
       isActive: user.isActive,
       role: user.role,
       email: user.email

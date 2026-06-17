@@ -3,10 +3,17 @@ import { Router } from "express";
 import { protect, authorize } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { upload } from "../../middlewares/upload.middleware.js";
-import { VendorsController } from "./vendors.controller.js"
+import { VendorsController } from "./vendors.controller.js";
 
 
 const router = Router();
+
+
+router.post(
+  "/verify-vendor", 
+  protect,
+  authorize("admin"),
+  VendorsController.verifyVendor);
 
 router.post(
   "/register", 
@@ -19,10 +26,42 @@ router.post(
   VendorsController.register
 );
 
-router.post(
-  "/verify-vendor", 
+router.get(
+  "/", 
+  protect, 
+  VendorsController.getVendors
+);
+
+router.patch(
+  "/profile", 
   protect,
-  authorize("admin"),
-  VendorsController.verifyVendor)
+  authorize("vendor"),
+  VendorsController.updateProfile
+);
+
+router.patch(
+  "/logo", 
+  protect,
+  authorize("vendor"),
+  upload.single("logo"),
+  VendorsController.uploadLogo
+);
+
+router.patch(
+  "/banner", 
+  protect,
+  authorize("vendor"),
+  upload.single("banner"),
+  VendorsController.uploadBanner
+);
+
+router.post(
+  "/license", 
+  protect,
+  authorize("vendor"),
+  upload.single("banner"),
+  VendorsController.uploadLicense
+);
+
 
 export default router;

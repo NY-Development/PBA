@@ -48,6 +48,20 @@ const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 // PAYMENT VERIFICATION
 const PAYMENT_API_KEY = process.env.PAYMENT_API_KEY;
 
+// SEED DATA AMOUNTS
+const SEED_USERS = Number(process.env.SEED_USERS) || 100;
+const SEED_PRODUCTS = Number(process.env.SEED_PRODUCTS) || 200;
+const SEED_ADDRESSES = Number(process.env.SEED_ADDRESSES) || 200;
+const SEED_ORDERS = Number(process.env.SEED_ORDERS) || 100;
+const SEED_ORDER_ITEMS = Number(process.env.SEED_ORDER_ITEMS) || 500;
+const SEED_PAYMENTS = Number(process.env.SEED_PAYMENTS) || 100;
+const SEED_REVIEWS = Number(process.env.SEED_REVIEWS) || 1000;
+const SEED_CART_ITEMS = Number(process.env.SEED_CART_ITEMS) || 500;
+const SEED_NOTIFICATIONS = Number(process.env.SEED_NOTIFICATIONS) || 100;
+const SEED_EXPO_TOKENS = Number(process.env.SEED_EXPO_TOKENS) || 100;
+const SEED_REFRESH_TOKENS = Number(process.env.SEED_REFRESH_TOKENS) || 100;
+const SEED_OTPs = Number(process.env.SEED_OTPs) || 100;
+
 
 
 export const Env = {
@@ -80,5 +94,18 @@ export const Env = {
   TEST_USER,
   TEST_PASS,
   
-  PAYMENT_API_KEY
-}
+  PAYMENT_API_KEY,
+  
+  SEED_ADDRESSES,
+  SEED_USERS,
+  SEED_PRODUCTS,
+  SEED_ORDERS,
+  SEED_ORDER_ITEMS,
+  SEED_PAYMENTS,
+  SEED_REVIEWS,
+  SEED_CART_ITEMS,
+  SEED_NOTIFICATIONS,
+  SEED_EXPO_TOKENS,
+  SEED_REFRESH_TOKENS,
+  SEED_OTPs,
+};

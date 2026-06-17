@@ -55,10 +55,93 @@ const verifyVendor = async (id) => {
   return result[0];
 };
 
+const getVendors = async () => {
+  const result = await db
+    .select({
+      firstName: users.firstName,
+      lastName: users.lastName,
+      storeName: vendors.storeName,
+      status: vendors.status,
+      isActive: users.isActive,
+      email: users.email,
+      phone: users.phone,
+      description: vendors.description,
+      logoUrl: vendors.logoUrl,
+      bannerUrl: vendors.bannerUrl,
+      createdAt: vendors.createdAt,
+    })
+    .from(vendors)
+    .innerJoin( users, eq(users.id, vendors.userId) );
+
+  return result;
+};
+
+const updateProfile = async ({
+  userId,
+  data
+}) => {
+  const result = await db
+    .update(vendors)
+    .set(data)
+    .where(
+      eq(vendors.userId, userId)
+    )
+    .returning();
+
+  return result[0];
+};
+
+const uploadLogo = async (data) => {
+  const result = await db
+    .update(vendors)
+    .set(data)
+    .where(
+      eq(vendors.userId, data.userId)
+    )
+    .returning();
+
+  return {
+    message:"Logo uploaded successfully"
+  };
+};
+
+const uploadBanner = async (data) => {
+  const result = await db
+    .update(vendors)
+    .set(data)
+    .where(
+      eq(vendors.userId, data.userId)
+    )
+    .returning();
+
+  return {
+    message:"banner uploaded successfully"
+  };
+};
+
+const uploadLicense = async (data) => {
+  const result = await db
+    .update(vendors)
+    .set(data)
+    .where(
+      eq(vendors.userId, data.userId)
+    )
+    .returning();
+
+  return {
+    message:"license uploaded successfully"
+  };
+};
+
 export const VendorsRepository = {
   register,
   findUserById,
   findVendorByUserId,
   findVendorById,
   verifyVendor,
+  getVendors,
+  updateProfile,
+  uploadLogo,
+  uploadBanner,
+  uploadLicense,
 };

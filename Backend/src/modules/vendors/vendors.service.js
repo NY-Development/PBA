@@ -8,127 +8,6 @@ import {
 } from "../../templates/email.template.js";
 
 
-// REGISTER
-const register = async ({
-  userId,
-  logo_buffer,
-  banner_buffer,
-  license_buffer,
-  bodyData,
-}) => {
-
-  const {
-    store_name,
-    description,
-    payout_email,
-    tin_number,
-  } = bodyData;
-  
-  if(!userId){
-    throw new Error("User id is required");
-  }
-  
-  if (!logo_buffer) {
-    throw new Error("Logo is required");
-  }
-  
-  if (!banner_buffer) {
-    throw new Error("Banner is required");
-  }
-  
-  if (!license_buffer) {
-    throw new Error("License document is required");
-  }
-
-  const existingUser =
-    await VendorsRepository.findUserById(userId);
-
-  if (!existingUser) {
-    throw new Error(
-      "User doesn't exist"
-    );
-  }
-
-  const existingVendor =
-    await VendorsRepository.findVendorByUserId(userId);
-
-  if (existingVendor) {
-    throw new Error(
-      "You've already registered as vendor"
-    );
-  }
-
-  // Upload files
-  const logoResult = await uploadToCloudinary(
-    logo_buffer,
-    `vendors/logo/${userId}`
-  );
-
-  const bannerResult = await uploadToCloudinary(
-    banner_buffer,
-    `vendors/banner/${userId}`
-  );
-
-  const licenseResult = await uploadToCloudinary(
-    license_buffer,
-    `vendors/license/${userId}`,
-    {
-      type: "private",
-    }
-  );
-
-  // Save vendor
-  const vendor = await VendorsRepository.register({
-    userId,
-
-    storeName: store_name,
-    description,
-
-    payoutEmail: payout_email,
-
-    tinNumber: tin_number,
-
-    status: "pending",
-
-    logoUrl: logoResult.secure_url,
-    bannerUrl: bannerResult.secure_url,
-
-    logoPublicId: logoResult.public_id,
-    bannerPublicId: bannerResult.public_id,
-
-    licensePublicId: licenseResult.public_id,
-  });
-
-  // Notify admin
-  await sendEmail({
-    to: "matusalasana@gmail.com",
-
-    subject: "New Vendor Application",
-
-    template: baseEmailTemplate({
-      appName: "PBA",
-
-      headerIcon: "📩",
-
-      title: `${store_name} wants to join PBA`,
-
-      subtitle: "Waiting for approval.",
-
-      greeting: "Hello,",
-
-      message:
-        "Please review the uploaded vendor documents.",
-
-      alertType: "info",
-
-      buttonText: "Open Dashboard",
-    }),
-  });
-
-  return vendor;
-};
-
-
 // VERIFY VENDOR
 const verifyVendor = async ({ id }) => {
 
@@ -191,7 +70,332 @@ const verifyVendor = async ({ id }) => {
   return verifiedVendor;
 };
 
+// REGISTER
+const register = async ({
+  userId,
+  logo_buffer,
+  banner_buffer,
+  license_buffer,
+  bodyData,
+}) => {
+
+  const {
+    store_name,
+    description,
+    payout_email,
+    tin_number,
+  } = bodyData;
+  
+  if(!userId){
+    throw new Error("User id is required");
+  }
+  
+  if (!logo_buffer) {
+    throw new Error("Logo is required");
+  }
+  
+  if (!banner_buffer) {
+    throw new Error("Banner is required");
+  }
+  
+  if (!license_buffer) {
+    throw new Error("License document is required");
+  }
+
+  const existingUser =
+    await VendorsRepository.findUserById(userId);
+
+  if (!existingUser) {
+    throw new Error(
+      "User doesn't exist"
+    );
+  }
+
+  const existingVendor =
+    await VendorsRepository.findVendorByUserId(userId);
+
+  if (existingVendor) {
+    throw new Error(
+      "You've already registered as vendor"
+    );
+  }
+
+  const logoResult = await uploadToCloudinary(
+    logo_buffer,
+    `vendors/logo/${userId}`
+  );
+
+  const bannerResult = await uploadToCloudinary(
+    banner_buffer,
+    `vendors/banner/${userId}`
+  );
+
+  const licenseResult = await uploadToCloudinary(
+    license_buffer,
+    `vendors/license/${userId}`,
+    {
+      type: "private",
+    }
+  );
+
+  const vendor = await VendorsRepository.register({
+    userId,
+
+    storeName: store_name,
+    description,
+
+    payoutEmail: payout_email,
+
+    tinNumber: tin_number,
+
+    status: "pending",
+
+    logoUrl: logoResult.secure_url,
+    bannerUrl: bannerResult.secure_url,
+
+    logoPublicId: logoResult.public_id,
+    bannerPublicId: bannerResult.public_id,
+
+    licensePublicId: licenseResult.public_id,
+  });
+
+  // Notify admin
+  await sendEmail({
+    to: "matusalasana@gmail.com",
+
+    subject: "New Vendor Application",
+
+    template: baseEmailTemplate({
+      appName: "PBA",
+
+      headerIcon: "📩",
+
+      title: `${store_name} wants to join PBA`,
+
+      subtitle: "Waiting for approval.",
+
+      greeting: "Hello,",
+
+      message:
+        "Please review the uploaded vendor documents.",
+
+      alertType: "info",
+
+      buttonText: "Open Dashboard",
+    }),
+  });
+
+  return vendor;
+};
+
+// GET VENDORS 
+const getVendors = async() => {
+  const result = await VendorsRepository.getVendors();
+  
+  return result;
+};
+
+// UPDATE VENDOR PROFILE
+const updateProfile = async({
+  userId,
+  body
+}) => {
+  if(!userId) throw new Error("User id not found");
+  
+  const user = await VendorsRepository.findUserById(userId);
+  
+  if(!user) throw new Error("User not found");
+  if(!user.isActive) throw new Error("Your account is temporarily locked/inactive");
+  
+  const vendor = await VendorsRepository.findVendorByUserId(userId);
+  if(!vendor) throw new Error("Vendor not found");
+  
+  const allowedStates = ['pending', 'inactive', 'active'];
+  if(!allowedStates.includes(vendor.status.toLowerCase())){
+    throw new Error("Your Account status doesn't allow you to perform this action");
+  };
+  
+  const { storeName, description } = body;
+  
+  const data = {};
+  
+  if(storeName !== undefined){
+    data.storeName = storeName;
+  }
+  if(description !== undefined){
+    data.description = description;
+  }
+  
+  if (Object.keys(data).length === 0) {
+    throw new Error('No data provided to update');
+  }
+  
+  
+  const result = await VendorsRepository.updateProfile({
+    userId,
+    data
+  });
+  
+  return result;
+};
+
+// UPLOAD LOGO
+const uploadLogo = async ({
+  userId,
+  logo_buffer,
+}) => {
+  
+  if(!userId){
+    throw new Error("User id is required");
+  }
+  
+  const userExists = await VendorsRepository.findUserById(
+    userId
+  );
+
+  if (!userExists) {
+    throw new Error(
+      "User doesn't exist"
+    );
+  }
+  
+  if (!logo_buffer) {
+    throw new Error("Logo is missing");
+  }
+
+  const vendorExists =
+    await VendorsRepository.findVendorByUserId(userId);
+
+  if (vendorExists) {
+    throw new Error(
+      "You've already registered as vendor"
+    );
+  }
+
+  const logoResult = await uploadToCloudinary(
+    logo_buffer,
+    `vendors/logo/${userId}`
+  );
+  
+  const dataToInsert = {
+    userId,
+    logoUrl: logoResult.secure_url,
+    logoPublicId: logoResult.public_id,
+  };
+
+  const { message } = await VendorsRepository.uploadLogo(dataToInsert);
+
+  return { message };
+};
+
+// UPLOAD BANNER
+const uploadBanner = async ({
+  userId,
+  banner_buffer,
+}) => {
+  
+  if(!userId){
+    throw new Error("User id is required");
+  }
+  
+  const userExists = await VendorsRepository.findUserById(
+    userId
+  );
+
+  if (!userExists) {
+    throw new Error(
+      "User doesn't exist"
+    );
+  }
+  
+  if (!banner_buffer) {
+    throw new Error("Logo is missing");
+  }
+
+  const vendorExists =
+    await VendorsRepository.findVendorByUserId(userId);
+
+  if (vendorExists) {
+    throw new Error(
+      "You've already registered as vendor"
+    );
+  }
+
+  const bannerResult = await uploadToCloudinary(
+    logo_buffer,
+    `vendors/banner/${userId}`
+  );
+  
+  const dataToInsert = {
+    userId,
+    bannerUrl: bannerResult.secure_url,
+    bannerPublicId: bannerResult.public_id,
+  };
+
+  const { message } = await VendorsRepository.uploadBanner(dataToInsert);
+
+  return { message };
+};
+
+// UPLOAD LICENSE
+const uploadLicense = async ({
+  userId,
+  license_buffer,
+}) => {
+  
+  if(!userId){
+    throw new Error("User id is required");
+  }
+  
+  const userExists = await VendorsRepository.findUserById(
+    userId
+  );
+
+  if (!userExists) {
+    throw new Error(
+      "User doesn't exist"
+    );
+  }
+
+  const vendorExists =
+    await VendorsRepository.findVendorByUserId(userId);
+
+  if (vendorExists) {
+    throw new Error(
+      "You've already registered as vendor"
+    );
+  }
+  
+  if (!license_buffer) {
+    throw new Error("License document is required");
+  }
+
+  const licenseResult = await uploadToCloudinary(
+    license_buffer,
+    `vendors/license/${userId}`,
+    {
+      type: "private",
+    }
+  );
+
+  const dataToInsert = {
+    userId,
+    licensePublicId: licenseResult.public_id,
+  };
+
+  const { message } = 
+    await VendorsRepository.uploadLicense(dataToInsert);
+
+  return { message };
+};
+
+
 export const VendorsService = {
-  register,
   verifyVendor,
+  register,
+  getVendors,
+  updateProfile,
+  uploadLogo,
+  uploadBanner,
+  uploadLicense,
 };

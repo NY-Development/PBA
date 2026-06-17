@@ -1,0 +1,74 @@
+import logger from "../../utils/logger.js";
+import { resetDatabase } from "./reset.js";
+import { seedUsers } from "./users.js";
+import { seedAddresses } from "./addresses.js";
+import { seedVendors } from "./vendors.js";
+import { seedCategories } from "./categories.js";
+import { seedNotifications } from "./notifications.js";
+import { seedOrders } from "./orders.js";
+import { seedProducts } from "./products.js";
+import { seedCartItems } from "./cartItems.js";
+import { seedOrderItems } from "./orderItems.js";
+import { seedPayments } from "./payments.js";
+import { seedExpoTokens } from "./expoTokens.js";
+import { seedOTPs } from "./otps.js";
+import { seedRefreshTokens } from "./refreshTokens.js";
+import { seedReviews } from "./reviews.js";
+
+
+const seed = async () => {
+  try {
+    
+    logger.info("DELETING THE EXISTING DATA ...");
+    await resetDatabase();
+    
+    logger.info(` SEEDING DATA ... `);
+    
+    const categories = await seedCategories();
+    logger.info(`✅ Seeded ${categories.length} categories`);
+    
+    const users = await seedUsers();
+    logger.info(`✅ Seeded ${users.length} users`);
+    
+    const otps = await seedOTPs();
+    logger.info(`✅ Seeded ${otps.length} otps`);
+    
+    const expoTokens = await seedExpoTokens();
+    logger.info(`✅ Seeded ${expoTokens.length} Expo tokens`);
+    
+    const refreshTokens = await seedRefreshTokens();
+    logger.info(`✅ Seeded ${refreshTokens.length} refresh tokens`);
+    
+    const vendors = await seedVendors();
+    logger.info(`✅ Seeded ${vendors.length} vendors`);
+    
+    const products = await seedProducts();
+    logger.info(`✅ Seeded ${products.length} products`);
+    
+    const reviews = await seedReviews();
+    logger.info(`✅ Seeded ${reviews.length} reviews`);
+    
+    const addresses = await seedAddresses();
+    logger.info(`✅ Seeded ${addresses.length} addresses`);
+    
+    const orders = await seedOrders();
+    logger.info(`✅ Seeded ${orders.length} orders`);
+    
+    const payments = await seedPayments();
+    logger.info(`✅ Seeded ${payments.length} payments`);
+    
+    const cartItems = await seedCartItems();
+    logger.info(`✅ Seeded ${cartItems.length} cart items`);
+    
+    const orderItems = await seedOrderItems();
+    logger.info(`✅ Seeded ${orderItems.length} order items`);
+    
+    const notifications = await seedNotifications();
+    logger.info(`✅ Seeded ${notifications.length} notifications`);
+
+  } catch (err) {
+    logger.error(err.cause || err.message);
+  }
+};
+
+seed();

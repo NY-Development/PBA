@@ -1,7 +1,9 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { expoTokens } from "../../db/schema/expoTokens.js";
 import { users } from "../../db/schema/users.js";
+import { addresses } from "../../db/schema/addresses.js";
+import { notifications } from "../../db/schema/notifications.js";
 
 const safeUser = {
   id: users.id,
@@ -14,6 +16,23 @@ const safeUser = {
   avatarUrl: users.avatarUrl,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
+};
+
+
+// SAVE EXPO TOKEN
+const savePushToken = async({
+  userId,
+  token
+}) => {
+  const result = await db
+    .insert(expo_tokens)
+    .values({
+      userId,
+      token
+    })
+    .returning();
+    
+  return result[0];
 };
 
 // USER PROFILE 
@@ -41,24 +60,190 @@ const updateUserProfile = async ({
   return result[0] || null;
 };
 
-// SAVE EXPO TOKEN
-const savePushToken = async({
-  userId,
-  token
+// UPLOAD AVATAR 
+const uploadAvatar = async({
+  avatarUrl,
+  avatarPublicId,
+  userId
 }) => {
   const result = await db
-    .insert(expo_tokens)
-    .values({
-      userId,
-      token
+    .update(users)
+    .set({
+      avatarUrl,
+      avatarPublicId
     })
-    .returning();
+    .where(eq(users.id, userId))
+    .returning({
+      avatarUrl,
+      avatarPublicId
+    });
     
   return result[0];
 };
+
+// GET ADDRESSES 
+const getAddresses = async(userId) => {
+  
+  const result = await db
+    .select()
+    .from(addresses)
+    .where(eq(addresses.userId, userId));
+  
+  return result;
+};
+
+const createAddresses = async (data) => {
+  
+  const result = await db
+    .insert(addresses)
+    .values(data)
+    .returning();
+
+  return result;
+};
+
+// GET ADDRESS
+const getAddress = async({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .select()
+    .from(addresses)
+    .where(
+      and(
+        eq(addresses.id, id),
+        eq(addresses.userId, userId),
+      )
+    );
+  
+  return result[0];
+};
+
+const updateAddress = async ({
+  userId,
+  data,
+  id
+}) => {
+  
+  const result = await db
+    .update(addresses)
+    .set(data)
+    .where(
+      and(
+        eq(addresses.id, id),
+        eq(addresses.userId, userId)
+      )
+    )
+    .returning();
+
+  return result[0];
+};
+
+// DELETE ADDRESS
+const deleteAddress = async({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .delete(addresses)
+    .where(
+      and(
+        eq(addresses.id, id),
+        eq(addresses.userId, userId),
+      )
+    );
+  
+  return {
+    message: "Address deleted successfully"
+  };
+};
+
+// GET NOTIFICATIONS 
+const getNotifications = async (userId) => {
+  
+  const result = await db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.userId, userId));
+
+  return result;
+};
+
+// GET NOTIFICATION
+const findNotificationById = async ({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .select()
+    .from(notifications)
+    .where(
+      and(
+        eq(notifications.id, id),
+        eq(notifications.userId, userId)
+      )
+    );
+
+  return result[0];
+};
+
+// READ NOTIFICATION
+const readNotification = async ({
+  userId,
+  id
+}) => {
+  
+  const result = await db
+    .update(notifications)
+    .set({
+      isRead: true
+    })
+    .where(
+      and(
+        eq(notifications.id, id),
+        eq(notifications.userId, userId)
+      )
+    );
+
+  return {
+    message: "Notification read successfully"
+  };
+};
+
+// READ ALL NOTIFICATIONS 
+const readAllNotifications = async (userId) => {
+  
+  const result = await db
+    .update(notifications)
+    .set({
+      isRead: true
+    })
+    .where(
+      eq(notifications.userId, userId)
+    );
+
+  return {
+    message: "All notifications read successfully"
+  };
+};
+
 
 export const UsersRepository = {
   savePushToken,
   getUserProfile,
   updateUserProfile,
+  uploadAvatar,
+  getAddresses,
+  createAddresses,
+  getAddress,
+  updateAddress,
+  deleteAddress,
+  getNotifications,
+  readNotification,
+  findNotificationById,
+  readAllNotifications
 };

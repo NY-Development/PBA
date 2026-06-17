@@ -4,6 +4,7 @@ import {
   smallint,
   text,
   timestamp,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 import { users } from "./users.js";
@@ -20,7 +21,7 @@ export const reviews = pgTable("reviews", {
     .notNull()
     .references(() => users.id),
 
-  rating: smallint("rating").notNull(),
+  rating: numeric("rating", { precision: 2, scale: 1 }).notNull(),
 
   comment: text("comment"),
 
