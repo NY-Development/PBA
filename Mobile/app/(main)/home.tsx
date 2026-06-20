@@ -19,7 +19,7 @@ export default function MainHomeScreen() {
 
   return (
     <View className="flex-1 bg-background items-center justify-center">
-      <Text className="text-foreground text-lg font-semibold">Home</Text>
+      <Text className="text-foreground text-lg font-semibold">Welcome to Nutora</Text>
       <CustomButton onPress={handleLogout} label="Logout" className='bg-destructive'/>
     </View>
   );

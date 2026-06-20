@@ -46,6 +46,9 @@ debug-storybook.log
 
 # Environment Variables
 .env
+.env.development
+.env.production
+.env.preview
 
 # Designs
 Design/

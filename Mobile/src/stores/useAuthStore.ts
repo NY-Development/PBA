@@ -6,7 +6,7 @@ interface UserProfile {
   lastName: string;
   email: string;
   phone: string;
-  role?: 'buyer' | 'maker' | 'customer' | 'seller';
+  role?: 'buyer' | 'maker' | 'customer' | 'seller' | 'vendor';
 }
 
 interface AuthState {

@@ -14,6 +14,7 @@ export default function SellerLayout() {
       <Stack.Screen name="dashboard" />
       <Stack.Screen name="orders" />
       <Stack.Screen name="registration" />
+      <Stack.Screen name="wizard-form" />
     </Stack>
   );
 }
