@@ -3,17 +3,42 @@ import { Cookie } from "../../utils/cookies.js";
 import logger from "../../utils/logger.js";
 
 
-// REGISTER
-const register = async (req, res) => {
+// REGISTER CUSTOMER 
+const registerCustomer = async (req, res) => {
   try {
-    await AuthService.register(req.body);
+    await AuthService.registerCustomer(req.body);
 
     return res.status(200).json({
       message: "OTP sent to your email",
     });
 
   } catch (error) {
-    logger.error(`Error registering user: ${error.message}`);
+    logger.error(`Error registering customer: ${error.message}`);
+
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+// REGISTER VENDOR 
+const registerVendor = async (req, res) => {
+  try {
+    const vendor = await VendorsService.register({
+      userId: req.user.userId, 
+      bodyData: req.body,
+      logo_buffer: req.files?.logo?.[0]?.buffer,
+      banner_buffer: req.files?.banner?.[0]?.buffer,
+      license_buffer: req.files?.license?.[0]?.buffer,
+    });
+
+    return res.status(200).json({
+      message: "OTP sent to your email",
+      vendor
+    });
+
+  } catch (error) {
+    logger.error("Error registering vendor:", error);
 
     return res.status(400).json({
       message: error.message,
@@ -211,7 +236,8 @@ const resendOTP = async(req, res) => {
 
 
 export const AuthController = {
-  register,
+  registerCustomer,
+  registerVendor,
   login,
   logout,
   refresh,

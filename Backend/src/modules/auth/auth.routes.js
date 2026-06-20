@@ -12,9 +12,15 @@ import {
 const router = Router();
 
 router.post(
-  "/register", 
+  "/register-customer", 
   validate(registerSchema), 
-  AuthController.register
+  AuthController.registerCustomer
+);
+
+router.post(
+  "/register-vendor", 
+  validate(registerSchema), 
+  AuthController.registerVendor
 );
 
 router.post(
