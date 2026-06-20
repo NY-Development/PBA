@@ -1,5 +1,6 @@
 import { db } from "../../db/index.js";
 import { users } from "../../db/schema/users.js";
+import { vendors } from "../../db/schema/vendors.js";
 import { refreshTokens } from "../../db/schema/refreshTokens.js";
 import { eq, sql, and } from "drizzle-orm";
 
@@ -26,7 +27,7 @@ const findUserById = async (id) => {
 };
 
 // REGISTER 
-const register = async ({
+const registerCustomer = async ({
   firstName,
   lastName,
   email,
@@ -44,6 +45,33 @@ const register = async ({
     .returning();
 
   return result[0];
+};
+
+// REGISTER VENDOR 
+const registerVendor = async ({
+  userData,
+  vendorData,
+}) => {
+
+  return db.transaction(async (tx) => {
+
+    const [user] = await tx
+      .insert(users)
+      .values(userData)
+      .returning();
+
+    await tx.insert(vendors).values({
+      userId: user.id,
+      storeName: vendorData.storeName,
+      description: vendorData.description,
+      logoUrl: vendorData.logoUrl,
+      bannerUrl: vendorData.bannerUrl,
+      tinNumber: vendorData.tinNumber,
+      payoutEmail: vendorData.payoutEmail,
+    });
+
+    return user;
+  });
 };
 
 // CREATE TOKEN
@@ -131,7 +159,8 @@ const logoutAll = async (userId) => {
 
 export const AuthRepository = {
   findUserByEmail,
-  register,
+  registerCustomer,
+  registerVendor,
   createToken,
   findTokenBySession,
   revokeToken,
